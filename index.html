@@ -923,39 +923,29 @@ async function joinRoom(){
   roomMyId='user_'+Math.random().toString(36).slice(2,8);
   roomRef=gun.get('studybeast_room_'+roomCode);
   let found=false;
-  roomRef.get('active').once((val)=>{
+  function doJoin(){
     if(found)return;
-    if(val){
-      found=true;
-      const st=getMyStatus();
-      roomRef.get('members').get(roomMyId).put(JSON.stringify(st));
-      const chatId='msg_'+Date.now()+'_'+roomMyId;
-      roomRef.get('chat').get(chatId).put(JSON.stringify({sys:true,text:getMyName()+' joined the room',ts:Date.now()}));
-      listenRoom();
-      showRoomActive();
-      toast('Joined room!');
-      startStatusSync();
-    }
+    found=true;
+    const st=getMyStatus();
+    roomRef.get('members').get(roomMyId).put(JSON.stringify(st));
+    const chatId='msg_'+Date.now()+'_'+roomMyId;
+    roomRef.get('chat').get(chatId).put(JSON.stringify({sys:true,text:getMyName()+' joined the room',ts:Date.now()}));
+    listenRoom();
+    showRoomActive();
+    toast('Joined room!');
+    startStatusSync();
+  }
+  // Use .on() instead of .once() so we catch data when it arrives from relay
+  const activeListener=roomRef.get('active').on((val)=>{
+    if(val&&!found){doJoin();roomRef.get('active').off()}
   });
-  roomRef.get('members').once((data)=>{
-    if(found)return;
-    if(data){
-      let hasMembers=false;
-      Object.keys(data).forEach(k=>{if(k!=='_'&&data[k]&&data[k]!=='null')hasMembers=true});
-      if(hasMembers){
-        found=true;
-        const st=getMyStatus();
-        roomRef.get('members').get(roomMyId).put(JSON.stringify(st));
-        const chatId='msg_'+Date.now()+'_'+roomMyId;
-        roomRef.get('chat').get(chatId).put(JSON.stringify({sys:true,text:getMyName()+' joined the room',ts:Date.now()}));
-        listenRoom();
-        showRoomActive();
-        toast('Joined room!');
-        startStatusSync();
-      }
-    }
+  const membersListener=roomRef.get('members').on((data)=>{
+    if(found||!data)return;
+    let hasMembers=false;
+    Object.keys(data).forEach(k=>{if(k!=='_'&&data[k]&&data[k]!=='null')hasMembers=true});
+    if(hasMembers){doJoin();roomRef.get('members').off()}
   });
-  setTimeout(()=>{if(!found){toast('Room not found. Check the code and try again.');roomRef=null;roomCode='';roomMyId=''}},8000);
+  setTimeout(()=>{if(!found){roomRef.get('active').off();roomRef.get('members').off();toast('Room not found. Check the code and try again.');roomRef=null;roomCode='';roomMyId=''}},10000);
 }
 
 function listenRoom(){
