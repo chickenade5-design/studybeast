@@ -869,7 +869,7 @@ function genRoomCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(l
 function getMyName(){return document.getElementById('roomName').value.trim()||'Anonymous'}
 function getMyColor(){return ROOM_COLORS[getMyName().length%ROOM_COLORS.length]}
 function getMyStatus(){
-  const pEl=document.getElementById('pomT');
+  const pEl=document.getElementById('pTime');
   let status='Idle', timer='';
   if(pEl&&pEl.textContent!=='00:00'){status='Studying';timer=pEl.textContent}
   return{name:getMyName(),color:getMyColor(),status,timer,level:D.level,streak:D.streak,xp:D.xp,ts:Date.now()}
@@ -887,7 +887,7 @@ function loadGun(){
 }
 
 function initGun(){
-  if(!gun) gun=Gun(['https://gun-manhattan.herokuapp.com/gun','https://gun-us.herokuapp.com/gun']);
+  if(!gun) gun=Gun(['https://gun-relay.peers.cloud/gun','https://peer.wallie.io/gun','https://gunjs.herokuapp.com/gun']);
 }
 
 async function createRoom(){
@@ -920,14 +920,14 @@ async function joinRoom(){
   roomCode=code;
   roomMyId='user_'+Math.random().toString(36).slice(2,8);
   roomRef=gun.get('studybeast_room_'+roomCode);
-  // Check if room exists by looking for any member
+  // Check if room exists by looking for active flag
   let found=false;
   roomRef.get('active').once((val)=>{
+    if(found)return;
     if(val){
       found=true;
       const st=getMyStatus();
       roomRef.get('members').get(roomMyId).put(JSON.stringify(st));
-      // Post join message
       const chatId='msg_'+Date.now()+'_'+roomMyId;
       roomRef.get('chat').get(chatId).put(JSON.stringify({sys:true,text:getMyName()+' joined the room',ts:Date.now()}));
       listenRoom();
@@ -936,7 +936,26 @@ async function joinRoom(){
       startStatusSync();
     }
   });
-  setTimeout(()=>{if(!found){toast('Room not found. Check the code and try again.')}},4000);
+  // Also try listening for members as a fallback (in case 'active' flag didn't propagate)
+  roomRef.get('members').once((data)=>{
+    if(found)return;
+    if(data){
+      let hasMembers=false;
+      Object.keys(data).forEach(k=>{if(k!=='_'&&data[k]&&data[k]!=='null')hasMembers=true});
+      if(hasMembers){
+        found=true;
+        const st=getMyStatus();
+        roomRef.get('members').get(roomMyId).put(JSON.stringify(st));
+        const chatId='msg_'+Date.now()+'_'+roomMyId;
+        roomRef.get('chat').get(chatId).put(JSON.stringify({sys:true,text:getMyName()+' joined the room',ts:Date.now()}));
+        listenRoom();
+        showRoomActive();
+        toast('Joined room!');
+        startStatusSync();
+      }
+    }
+  });
+  setTimeout(()=>{if(!found){toast('Room not found. Check the code and try again.');roomRef=null;roomCode='';roomMyId=''}},8000);
 }
 
 function listenRoom(){
