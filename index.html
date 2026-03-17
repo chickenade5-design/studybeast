@@ -520,6 +520,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <span style="color:var(--muted);align-self:center;font-size:0.85rem">or</span>
 <div style="display:flex;gap:6px;flex:1;min-width:200px"><input type="text" id="roomCode" placeholder="Enter room code" maxlength="6" style="flex:1;padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);border-radius:10px;font-size:0.9rem;text-transform:uppercase;letter-spacing:2px"><button class="btn btn-g" onclick="joinRoom()">Join</button></div>
 </div>
+<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+<button class="btn btn-g btn-s" onclick="shareLink()" style="width:100%">&#128279; Share StudyBeast with Friends</button>
+</div>
 </div>
 <div class="glass" id="roomActive" style="display:none">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
@@ -528,6 +531,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 </div>
 <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
 <button class="btn btn-g btn-s" onclick="copyRoomCode()">Copy Code</button>
+<button class="btn btn-g btn-s" onclick="shareInvite()">Share Invite</button>
 <button class="btn btn-g btn-s" onclick="sendStatus()">Sync Status</button>
 </div>
 <h3 style="font-size:0.92rem;margin-bottom:10px">Members</h3>
@@ -1045,6 +1049,20 @@ function showRoomActive(){
 
 function copyRoomCode(){
   navigator.clipboard.writeText(roomCode).then(()=>toast('Room code copied!')).catch(()=>{});
+}
+
+function shareLink(){
+  const url='https://chickenade5-design.github.io/studybeast/';
+  const text='Study with me on StudyBeast! '+url;
+  if(navigator.share){navigator.share({title:'StudyBeast',text:'Study with me on StudyBeast!',url}).catch(()=>{})}
+  else{navigator.clipboard.writeText(text).then(()=>toast('Link copied! Send it to your friends.')).catch(()=>toast('Copy this link: '+url))}
+}
+
+function shareInvite(){
+  const url='https://chickenade5-design.github.io/studybeast/';
+  const text='Join my study room on StudyBeast!\nRoom code: '+roomCode+'\n'+url;
+  if(navigator.share){navigator.share({title:'StudyBeast Room',text:text}).catch(()=>{})}
+  else{navigator.clipboard.writeText(text).then(()=>toast('Invite copied!')).catch(()=>toast('Room code: '+roomCode))}
 }
 
 function leaveRoom(){
