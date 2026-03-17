@@ -12,6 +12,11 @@
 [data-theme="forest"]{--bg:#0d1a0d;--card:rgba(80,200,80,0.04);--border:rgba(80,200,80,0.1);--accent1:#22c55e;--accent2:#86efac;--accent3:#ef4444;--accent4:#a3e635;--accent5:#facc15;--text:#d4edda;--muted:#5a8a5a;--sidebar:rgba(5,15,5,0.5)}
 [data-theme="sunset"]{--bg:#1a0d13;--card:rgba(255,100,50,0.04);--border:rgba(255,100,50,0.1);--accent1:#f97316;--accent2:#fb923c;--accent3:#ef4444;--accent4:#84cc16;--accent5:#eab308;--text:#fde8d8;--muted:#a0705a;--sidebar:rgba(20,5,10,0.5)}
 [data-theme="light"]{--bg:#f5f5f9;--card:rgba(0,0,0,0.03);--border:rgba(0,0,0,0.1);--accent1:#7c3aed;--accent2:#0891b2;--accent3:#e11d48;--accent4:#16a34a;--accent5:#ca8a04;--text:#1e1e2e;--muted:#6b7280;--sidebar:rgba(255,255,255,0.7)}
+[data-theme="pastel-pink"]{--bg:#fff0f3;--card:rgba(255,150,170,0.08);--border:rgba(255,150,170,0.2);--accent1:#f9a8d4;--accent2:#c4b5fd;--accent3:#fda4af;--accent4:#86efac;--accent5:#fcd34d;--text:#4a3040;--muted:#b08090;--sidebar:rgba(255,220,230,0.6)}
+[data-theme="pastel-lavender"]{--bg:#f3f0ff;--card:rgba(180,160,255,0.08);--border:rgba(180,160,255,0.2);--accent1:#c4b5fd;--accent2:#93c5fd;--accent3:#fda4af;--accent4:#a7f3d0;--accent5:#fde68a;--text:#3b3060;--muted:#9088b0;--sidebar:rgba(220,210,255,0.6)}
+[data-theme="pastel-mint"]{--bg:#ecfdf5;--card:rgba(110,230,180,0.08);--border:rgba(110,230,180,0.2);--accent1:#6ee7b7;--accent2:#67e8f9;--accent3:#fca5a5;--accent4:#86efac;--accent5:#fde68a;--text:#1a3a2a;--muted:#70a090;--sidebar:rgba(200,250,225,0.6)}
+[data-theme="pastel-sky"]{--bg:#eff6ff;--card:rgba(140,180,255,0.08);--border:rgba(140,180,255,0.2);--accent1:#93c5fd;--accent2:#a5b4fc;--accent3:#fda4af;--accent4:#86efac;--accent5:#fcd34d;--text:#1e3050;--muted:#7090b8;--sidebar:rgba(210,225,255,0.6)}
+[data-theme="pastel-peach"]{--bg:#fff7ed;--card:rgba(255,180,130,0.08);--border:rgba(255,180,130,0.2);--accent1:#fdba74;--accent2:#f9a8d4;--accent3:#fca5a5;--accent4:#a7f3d0;--accent5:#fde68a;--text:#4a3020;--muted:#b89070;--sidebar:rgba(255,230,210,0.6)}
 
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;transition:background 0.4s,color 0.4s}
@@ -887,7 +892,7 @@ function loadGun(){
 }
 
 function initGun(){
-  if(!gun) gun=Gun(['https://gun-relay.peers.cloud/gun','https://peer.wallie.io/gun','https://gunjs.herokuapp.com/gun']);
+  if(!gun) gun=Gun(['https://studybeast-relay.onrender.com/gun']);
 }
 
 async function createRoom(){
@@ -898,12 +903,9 @@ async function createRoom(){
   roomCode=genRoomCode();
   roomMyId='host_'+Math.random().toString(36).slice(2,8);
   roomRef=gun.get('studybeast_room_'+roomCode);
-  // Mark room as active
   roomRef.get('active').put(true);
-  // Add self as member
   const st=getMyStatus(); st.isHost=true;
   roomRef.get('members').get(roomMyId).put(JSON.stringify(st));
-  // Listen for members
   listenRoom();
   showRoomActive();
   toast('Room created! Share the code.');
@@ -920,7 +922,6 @@ async function joinRoom(){
   roomCode=code;
   roomMyId='user_'+Math.random().toString(36).slice(2,8);
   roomRef=gun.get('studybeast_room_'+roomCode);
-  // Check if room exists by looking for active flag
   let found=false;
   roomRef.get('active').once((val)=>{
     if(found)return;
@@ -936,7 +937,6 @@ async function joinRoom(){
       startStatusSync();
     }
   });
-  // Also try listening for members as a fallback (in case 'active' flag didn't propagate)
   roomRef.get('members').once((data)=>{
     if(found)return;
     if(data){
@@ -960,7 +960,6 @@ async function joinRoom(){
 
 function listenRoom(){
   if(!roomRef)return;
-  // Listen for member updates
   roomRef.get('members').map().on((data,key)=>{
     if(!data||data==='null')return;
     try{
@@ -973,7 +972,6 @@ function listenRoom(){
       }
     }catch(e){}
   });
-  // Listen for chat
   roomRef.get('chat').map().on((data,key)=>{
     if(!data||chatSeen.has(key))return;
     chatSeen.add(key);
@@ -990,7 +988,6 @@ function sendStatus(){
   const st=getMyStatus();
   if(roomMyId.startsWith('host_')) st.isHost=true;
   roomRef.get('members').get(roomMyId).put(JSON.stringify(st));
-  // Clean stale members (no update in 30s)
   const now=Date.now();
   Object.entries(roomMembers).forEach(([k,m])=>{
     if(k!==roomMyId&&m.ts&&now-m.ts>30000){
@@ -1091,7 +1088,7 @@ function renStats(){
   document.getElementById('achList').innerHTML=achs.map(a=>`<div style="padding:8px 12px;border-radius:9px;background:${a.ok?'rgba(16,185,129,0.12)':'rgba(255,255,255,0.03)'};border:1px solid ${a.ok?'var(--accent4)':'var(--border)'};font-size:0.8rem;${a.ok?'':'opacity:0.35'}" title="${a.d}">${a.ok?'&#9733;':'&#9734;'} ${a.n}</div>`).join('')}
 
 // ===== SETTINGS =====
-const themes=[{id:'midnight',color:'#0b0b1a'},{id:'cyberpunk',color:'#1a0020'},{id:'ocean',color:'#0c1929'},{id:'forest',color:'#0d1a0d'},{id:'sunset',color:'#1a0d13'},{id:'light',color:'#f5f5f9'}];
+const themes=[{id:'midnight',color:'#0b0b1a'},{id:'cyberpunk',color:'#1a0020'},{id:'ocean',color:'#0c1929'},{id:'forest',color:'#0d1a0d'},{id:'sunset',color:'#1a0d13'},{id:'light',color:'#f5f5f9'},{id:'pastel-pink',color:'#fff0f3'},{id:'pastel-lavender',color:'#f3f0ff'},{id:'pastel-mint',color:'#ecfdf5'},{id:'pastel-sky',color:'#eff6ff'},{id:'pastel-peach',color:'#fff7ed'}];
 function renSett(){
   document.getElementById('themeGrid').innerHTML=themes.map(t=>`<div class="theme-swatch ${D.settings.theme===t.id?'active':''}" style="background:${t.color}" onclick="setTheme('${t.id}')" title="${t.id}"></div>`).join('');
   document.getElementById('sFocus').value=D.settings.focus||25;document.getElementById('sShort').value=D.settings.short||5;document.getElementById('sLong').value=D.settings.long||15;document.getElementById('sSfx').value=D.settings.sfx||'on';updAutoBtn()}
