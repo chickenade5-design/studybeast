@@ -861,52 +861,52 @@ function clearWB(){wHist.push(wCtx.getImageData(0,0,1000,520));wCtx.clearRect(0,
 function undoWB(){if(wHist.length)wCtx.putImageData(wHist.pop(),0,0)}
 function saveWB(){const a=document.createElement('a');a.download='whiteboard.png';a.href=document.getElementById('wbC').toDataURL();a.click()}
 
-// ===== STUDY ROOM (PeerJS WebRTC) =====
+// ===== STUDY ROOM (Gun.js Real-time) =====
 const ROOM_COLORS=['#7c3aed','#06b6d4','#f43f5e','#10b981','#f59e0b','#ff00ff','#3b82f6','#ef4444'];
-let roomPeer=null, roomConns={}, roomMembers={}, roomCode='', roomIsHost=false, roomStatusInterval=null;
+let gun=null, roomRef=null, roomMembers={}, roomCode='', roomMyId='', roomStatusInterval=null, chatSeen=new Set();
 
 function genRoomCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<5;i++)r+=c[Math.floor(Math.random()*c.length)];return r}
 function getMyName(){return document.getElementById('roomName').value.trim()||'Anonymous'}
 function getMyColor(){return ROOM_COLORS[getMyName().length%ROOM_COLORS.length]}
-
 function getMyStatus(){
   const pEl=document.getElementById('pomT');
   let status='Idle', timer='';
   if(pEl&&pEl.textContent!=='00:00'){status='Studying';timer=pEl.textContent}
-  return{name:getMyName(),color:getMyColor(),status,timer,level:D.level,streak:D.streak,xp:D.xp}
+  return{name:getMyName(),color:getMyColor(),status,timer,level:D.level,streak:D.streak,xp:D.xp,ts:Date.now()}
 }
 
-function loadPeerJS(){
+function loadGun(){
   return new Promise((res,rej)=>{
-    if(window.Peer)return res();
+    if(window.Gun)return res();
     const s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
-    s.onload=()=>{if(window.Peer)res();else rej(new Error('PeerJS not loaded'))};
-    s.onerror=()=>rej(new Error('Failed to load PeerJS'));
+    s.src='https://cdn.jsdelivr.net/npm/gun/gun.js';
+    s.onload=()=>{if(window.Gun)res();else rej(new Error('Gun not loaded'))};
+    s.onerror=()=>rej(new Error('Failed to load Gun.js'));
     document.head.appendChild(s);
   });
+}
+
+function initGun(){
+  if(!gun) gun=Gun(['https://gun-manhattan.herokuapp.com/gun','https://gun-us.herokuapp.com/gun']);
 }
 
 async function createRoom(){
   if(!getMyName()||getMyName()==='Anonymous'){toast('Please enter your name first');return}
   toast('Creating room...');
-  try{await loadPeerJS()}catch(e){toast('Failed to load networking. Check internet.');return}
-  roomCode=genRoomCode(); roomIsHost=true;
-  const peerId='studybeast'+roomCode+'host';
-  if(roomPeer){try{roomPeer.destroy()}catch(e){}}
-  roomPeer=new Peer(peerId,{debug:1});
-  roomPeer.on('open',(id)=>{
-    console.log('Host peer open with id:',id);
-    roomMembers['host']={...getMyStatus(),isHost:true};
-    showRoomActive();
-    toast('Room created! Share the code.');
-  });
-  roomPeer.on('connection',conn=>{handleConn(conn)});
-  roomPeer.on('error',e=>{
-    console.warn('Peer error:',e);
-    if(e.type==='unavailable-id'){toast('Room code taken, retrying...');roomCode=genRoomCode();createRoom();return}
-    toast('Connection error: '+e.type);
-  });
+  try{await loadGun()}catch(e){toast('Failed to load networking. Check internet.');return}
+  initGun();
+  roomCode=genRoomCode();
+  roomMyId='host_'+Math.random().toString(36).slice(2,8);
+  roomRef=gun.get('studybeast_room_'+roomCode);
+  // Mark room as active
+  roomRef.get('active').put(true);
+  // Add self as member
+  const st=getMyStatus(); st.isHost=true;
+  roomRef.get('members').get(roomMyId).put(JSON.stringify(st));
+  // Listen for members
+  listenRoom();
+  showRoomActive();
+  toast('Room created! Share the code.');
   startStatusSync();
 }
 
@@ -915,84 +915,69 @@ async function joinRoom(){
   const code=(document.getElementById('roomCode').value||'').toUpperCase().trim();
   if(!code||code.length<4){toast('Enter a valid room code');return}
   toast('Connecting to room...');
-  try{await loadPeerJS()}catch(e){toast('Failed to load networking.');return}
-  roomCode=code; roomIsHost=false;
-  const myId='studybeast'+roomCode+Math.random().toString(36).slice(2,8);
-  if(roomPeer){try{roomPeer.destroy()}catch(e){}}
-  roomPeer=new Peer(myId,{debug:1});
-  const joinTimeout=setTimeout(()=>{toast('Could not find room. Check the code and try again.');},12000);
-  roomPeer.on('open',(id)=>{
-    console.log('Joiner peer open with id:',id);
-    const hostId='studybeast'+roomCode+'host';
-    console.log('Connecting to host:',hostId);
-    const conn=roomPeer.connect(hostId,{reliable:true,serialization:'json'});
-    if(!conn){clearTimeout(joinTimeout);toast('Failed to create connection');return}
-    conn.on('open',()=>{
-      clearTimeout(joinTimeout);
-      console.log('Connection to host opened');
-      roomConns['host']=conn;
-      conn.send({type:'join',data:getMyStatus()});
+  try{await loadGun()}catch(e){toast('Failed to load networking.');return}
+  initGun();
+  roomCode=code;
+  roomMyId='user_'+Math.random().toString(36).slice(2,8);
+  roomRef=gun.get('studybeast_room_'+roomCode);
+  // Check if room exists by looking for any member
+  let found=false;
+  roomRef.get('active').once((val)=>{
+    if(val){
+      found=true;
+      const st=getMyStatus();
+      roomRef.get('members').get(roomMyId).put(JSON.stringify(st));
+      // Post join message
+      const chatId='msg_'+Date.now()+'_'+roomMyId;
+      roomRef.get('chat').get(chatId).put(JSON.stringify({sys:true,text:getMyName()+' joined the room',ts:Date.now()}));
+      listenRoom();
       showRoomActive();
       toast('Joined room!');
-      conn.on('data',d=>handleData('host',d));
-      conn.on('close',()=>{toast('Disconnected from room');leaveRoom()});
-    });
-    conn.on('error',e=>{clearTimeout(joinTimeout);toast('Could not connect to room: '+e.type);console.warn('Conn error:',e)});
+      startStatusSync();
+    }
   });
-  roomPeer.on('error',e=>{
-    clearTimeout(joinTimeout);
-    console.warn('Peer error:',e);
-    if(e.type==='peer-unavailable'){toast('Room not found. Check the code.');return}
-    toast('Connection error: '+e.type);
-  });
-  startStatusSync();
+  setTimeout(()=>{if(!found){toast('Room not found. Check the code and try again.')}},4000);
 }
 
-function handleConn(conn){
-  const cId=conn.peer;
-  console.log('Incoming connection from:',cId);
-  conn.on('open',()=>{
-    console.log('Connection opened with:',cId);
-    roomConns[cId]=conn;
-    conn.on('data',d=>handleData(cId,d));
-    conn.on('close',()=>{const name=roomMembers[cId]?.name||'Someone';delete roomConns[cId];delete roomMembers[cId];renRoomMembers();broadcastMembers();addChatSys(name+' left')});
+function listenRoom(){
+  if(!roomRef)return;
+  // Listen for member updates
+  roomRef.get('members').map().on((data,key)=>{
+    if(!data||data==='null')return;
+    try{
+      const m=typeof data==='string'?JSON.parse(data):data;
+      if(m.name){
+        const wasNew=!roomMembers[key];
+        roomMembers[key]=m;
+        renRoomMembers();
+        if(wasNew&&key!==roomMyId) addChatSys(m.name+' is in the room');
+      }
+    }catch(e){}
   });
-}
-
-function handleData(fromId,msg){
-  if(msg.type==='join'){
-    roomMembers[fromId]=msg.data;
-    renRoomMembers();
-    addChatSys(msg.data.name+' joined the room');
-    if(roomIsHost)broadcastMembers();
-  } else if(msg.type==='status'){
-    roomMembers[fromId]={...roomMembers[fromId],...msg.data};
-    renRoomMembers();
-    if(roomIsHost)broadcastMembers();
-  } else if(msg.type==='members'){
-    roomMembers=msg.data;
-    roomMembers['me']=getMyStatus();
-    renRoomMembers();
-  } else if(msg.type==='chat'){
-    addChatMsg(msg.name,msg.text,msg.color);
-  } else if(msg.type==='sys'){
-    addChatSys(msg.text);
-  }
-}
-
-function broadcastMembers(){
-  const allMembers={...roomMembers};
-  Object.values(roomConns).forEach(c=>{try{c.send({type:'members',data:allMembers})}catch(e){}});
+  // Listen for chat
+  roomRef.get('chat').map().on((data,key)=>{
+    if(!data||chatSeen.has(key))return;
+    chatSeen.add(key);
+    try{
+      const m=typeof data==='string'?JSON.parse(data):data;
+      if(m.sys){addChatSys(m.text)}
+      else if(m.from!==roomMyId){addChatMsg(m.name,m.text,m.color)}
+    }catch(e){}
+  });
 }
 
 function sendStatus(){
+  if(!roomRef)return;
   const st=getMyStatus();
-  if(roomIsHost){
-    roomMembers['host']={...st,isHost:true};
-    broadcastMembers();
-  } else {
-    Object.values(roomConns).forEach(c=>{try{c.send({type:'status',data:st})}catch(e){}});
-  }
+  if(roomMyId.startsWith('host_')) st.isHost=true;
+  roomRef.get('members').get(roomMyId).put(JSON.stringify(st));
+  // Clean stale members (no update in 30s)
+  const now=Date.now();
+  Object.entries(roomMembers).forEach(([k,m])=>{
+    if(k!==roomMyId&&m.ts&&now-m.ts>30000){
+      delete roomMembers[k];
+    }
+  });
   renRoomMembers();
 }
 
@@ -1004,8 +989,10 @@ function startStatusSync(){
 function sendMsg(){
   const inp=document.getElementById('roomMsg');
   const text=inp.value.trim(); if(!text)return;
-  const msg={type:'chat',name:getMyName(),text,color:getMyColor()};
-  Object.values(roomConns).forEach(c=>{try{c.send(msg)}catch(e){}});
+  const chatId='msg_'+Date.now()+'_'+roomMyId;
+  const msg={name:getMyName(),text,color:getMyColor(),from:roomMyId,ts:Date.now()};
+  roomRef.get('chat').get(chatId).put(JSON.stringify(msg));
+  chatSeen.add(chatId);
   addChatMsg(getMyName(),text,getMyColor());
   inp.value='';
 }
@@ -1023,11 +1010,11 @@ function addChatSys(text){
 }
 
 function renRoomMembers(){
-  const el=document.getElementById('roomMembers');
+  const el=document.getElementById('roomMembers');if(!el)return;
   const members=Object.entries(roomMembers);
   el.innerHTML=members.map(([id,m])=>{
     const initial=(m.name||'?')[0].toUpperCase();
-    const isMe=(roomIsHost&&id==='host')||(!roomIsHost&&id==='me');
+    const isMe=id===roomMyId;
     return `<div class="rm-card">
       <div class="rm-av" style="background:${m.color||'var(--accent1)'}">${initial}</div>
       <div class="rm-info">
@@ -1067,10 +1054,8 @@ function shareInvite(){
 
 function leaveRoom(){
   if(roomStatusInterval){clearInterval(roomStatusInterval);roomStatusInterval=null}
-  Object.values(roomConns).forEach(c=>{try{c.close()}catch(e){}});
-  roomConns={};roomMembers={};
-  if(roomPeer){try{roomPeer.destroy()}catch(e){} roomPeer=null}
-  roomCode='';roomIsHost=false;
+  if(roomRef&&roomMyId){roomRef.get('members').get(roomMyId).put('null')}
+  roomRef=null;roomMembers={};roomCode='';roomMyId='';chatSeen.clear();
   document.getElementById('roomLobby').style.display='block';
   document.getElementById('roomActive').style.display='none';
   document.getElementById('roomChat').innerHTML='';
