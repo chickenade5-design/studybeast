@@ -876,27 +876,32 @@ function loadPeerJS(){
   return new Promise((res,rej)=>{
     if(window.Peer)return res();
     const s=document.createElement('script');
-    s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
-    s.onload=res; s.onerror=()=>rej(new Error('Failed to load PeerJS'));
+    s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+    s.onload=()=>{if(window.Peer)res();else rej(new Error('PeerJS not loaded'))};
+    s.onerror=()=>rej(new Error('Failed to load PeerJS'));
     document.head.appendChild(s);
   });
 }
 
 async function createRoom(){
   if(!getMyName()||getMyName()==='Anonymous'){toast('Please enter your name first');return}
+  toast('Creating room...');
   try{await loadPeerJS()}catch(e){toast('Failed to load networking. Check internet.');return}
   roomCode=genRoomCode(); roomIsHost=true;
-  const peerId='sb-'+roomCode+'-host';
-  roomPeer=new Peer(peerId);
-  roomPeer.on('open',()=>{
+  const peerId='studybeast'+roomCode+'host';
+  if(roomPeer){try{roomPeer.destroy()}catch(e){}}
+  roomPeer=new Peer(peerId,{debug:1});
+  roomPeer.on('open',(id)=>{
+    console.log('Host peer open with id:',id);
     roomMembers['host']={...getMyStatus(),isHost:true};
     showRoomActive();
     toast('Room created! Share the code.');
-    roomPeer.on('connection',conn=>{handleConn(conn)});
   });
+  roomPeer.on('connection',conn=>{handleConn(conn)});
   roomPeer.on('error',e=>{
-    if(e.type==='unavailable-id'){toast('Room code conflict, try again');roomCode=genRoomCode();createRoom();return}
-    console.warn('Peer error:',e); toast('Connection error: '+e.type);
+    console.warn('Peer error:',e);
+    if(e.type==='unavailable-id'){toast('Room code taken, retrying...');roomCode=genRoomCode();createRoom();return}
+    toast('Connection error: '+e.type);
   });
   startStatusSync();
 }
@@ -905,13 +910,22 @@ async function joinRoom(){
   if(!getMyName()||getMyName()==='Anonymous'){toast('Please enter your name first');return}
   const code=(document.getElementById('roomCode').value||'').toUpperCase().trim();
   if(!code||code.length<4){toast('Enter a valid room code');return}
+  toast('Connecting to room...');
   try{await loadPeerJS()}catch(e){toast('Failed to load networking.');return}
   roomCode=code; roomIsHost=false;
-  const myId='sb-'+roomCode+'-'+Math.random().toString(36).slice(2,8);
-  roomPeer=new Peer(myId);
-  roomPeer.on('open',()=>{
-    const conn=roomPeer.connect('sb-'+roomCode+'-host',{reliable:true});
+  const myId='studybeast'+roomCode+Math.random().toString(36).slice(2,8);
+  if(roomPeer){try{roomPeer.destroy()}catch(e){}}
+  roomPeer=new Peer(myId,{debug:1});
+  const joinTimeout=setTimeout(()=>{toast('Could not find room. Check the code and try again.');},12000);
+  roomPeer.on('open',(id)=>{
+    console.log('Joiner peer open with id:',id);
+    const hostId='studybeast'+roomCode+'host';
+    console.log('Connecting to host:',hostId);
+    const conn=roomPeer.connect(hostId,{reliable:true,serialization:'json'});
+    if(!conn){clearTimeout(joinTimeout);toast('Failed to create connection');return}
     conn.on('open',()=>{
+      clearTimeout(joinTimeout);
+      console.log('Connection to host opened');
       roomConns['host']=conn;
       conn.send({type:'join',data:getMyStatus()});
       showRoomActive();
@@ -919,18 +933,25 @@ async function joinRoom(){
       conn.on('data',d=>handleData('host',d));
       conn.on('close',()=>{toast('Disconnected from room');leaveRoom()});
     });
-    conn.on('error',e=>{toast('Could not connect to room');console.warn(e)});
+    conn.on('error',e=>{clearTimeout(joinTimeout);toast('Could not connect to room: '+e.type);console.warn('Conn error:',e)});
   });
-  roomPeer.on('error',e=>{toast('Connection error: '+e.type);console.warn(e)});
+  roomPeer.on('error',e=>{
+    clearTimeout(joinTimeout);
+    console.warn('Peer error:',e);
+    if(e.type==='peer-unavailable'){toast('Room not found. Check the code.');return}
+    toast('Connection error: '+e.type);
+  });
   startStatusSync();
 }
 
 function handleConn(conn){
   const cId=conn.peer;
+  console.log('Incoming connection from:',cId);
   conn.on('open',()=>{
+    console.log('Connection opened with:',cId);
     roomConns[cId]=conn;
     conn.on('data',d=>handleData(cId,d));
-    conn.on('close',()=>{delete roomConns[cId];delete roomMembers[cId];renRoomMembers();broadcastMembers();addChatSys((roomMembers[cId]?.name||'Someone')+' left')});
+    conn.on('close',()=>{const name=roomMembers[cId]?.name||'Someone';delete roomConns[cId];delete roomMembers[cId];renRoomMembers();broadcastMembers();addChatSys(name+' left')});
   });
 }
 
