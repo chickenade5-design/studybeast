@@ -1377,14 +1377,16 @@ function saveRoomState(){
 function loadRoomState(){return JSON.parse(sessionStorage.getItem('sb_room')||'null')}
 async function autoRejoinRoom(){
   const rs=loadRoomState();
-  if(!rs)return;
+  if(!rs){console.log('[Room] No saved room state');return}
+  console.log('[Room] Rejoining room',rs.code,'as',rs.myId);
   document.getElementById('roomName').value=rs.name||'';
-  try{await connectWS()}catch(e){sessionStorage.removeItem('sb_room');return}
+  try{await connectWS()}catch(e){console.log('[Room] WS connect failed',e);sessionStorage.removeItem('sb_room');return}
   roomCode=rs.code;
   roomMyId=rs.myId;
   const st=getMyStatus();
   if(roomMyId.startsWith('host_'))st.isHost=true;
   wsSend({type:'join',code:roomCode,userId:roomMyId,status:st});
+  console.log('[Room] Rejoin message sent');
 }
 
 function genRoomCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<5;i++)r+=c[Math.floor(Math.random()*c.length)];return r}

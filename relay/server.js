@@ -11,7 +11,7 @@ const server = http.createServer((req, res) => {
     'Access-Control-Allow-Origin': '*',
     'Content-Type': 'text/plain'
   });
-  res.end('StudyBeast relay v2 running. Rooms: ' + rooms.size);
+  res.end('StudyBeast relay v3 running. Rooms: ' + rooms.size);
 });
 
 const wss = new WebSocketServer({ server });
