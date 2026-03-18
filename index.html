@@ -531,7 +531,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 </div>
 <div class="glass" style="margin-bottom:14px;cursor:pointer" onclick="go('pet')">
 <div style="display:flex;align-items:center;gap:16px">
-<div id="dashPetSprite" style="font-size:3rem;filter:drop-shadow(0 2px 10px rgba(124,58,237,0.3))">&#129442;</div>
+<div id="dashPetSprite" style="font-size:3rem;filter:drop-shadow(0 2px 10px rgba(124,58,237,0.3))">&#129370;</div>
 <div style="flex:1">
 <div style="font-weight:700;font-size:0.95rem" id="dashPetName">Your Beast</div>
 <div style="font-size:0.78rem;color:var(--muted)" id="dashPetStatus">Tap to visit your pet!</div>
@@ -718,7 +718,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="pet-container">
 <div class="pet-scene">
 <div class="pet-particles" id="petParticles"></div>
-<div class="pet-sprite" id="petSprite" onclick="petPat()">&#129442;</div>
+<div class="pet-sprite" id="petSprite" onclick="petPat()">&#129370;</div>
 </div>
 <div class="pet-name" id="petName">Your Beast</div>
 <div class="pet-stage" id="petStage">Egg &middot; Stage 1/5</div>
@@ -1594,11 +1594,11 @@ function updFLReturnBtn(){
 
 // ===== STUDY PET =====
 const PET_STAGES=[
-  {name:'Egg',sprite:'&#129442;',minXP:0,desc:'A mysterious egg. Keep studying to hatch it!'},
-  {name:'Baby Beast',sprite:'&#128048;',minXP:100,desc:'Your beast hatched! It\'s tiny but full of energy. Keep feeding it knowledge!'},
-  {name:'Teen Beast',sprite:'&#128049;',minXP:350,desc:'Your beast is growing fast! It\'s becoming more confident and loves watching you study.'},
-  {name:'Adult Beast',sprite:'&#129409;',minXP:800,desc:'A powerful study companion! Your beast roars with pride at your dedication.'},
-  {name:'Legendary Beast',sprite:'&#128009;',minXP:1500,desc:'A LEGENDARY beast! Few students ever raise one this powerful. You are a true scholar.'}
+  {name:'Egg',sprite:'&#129370;',minXP:0,desc:'A mysterious egg is glowing softly... Keep studying to hatch it!'},
+  {name:'Baby Beast',sprite:'&#128035;',minXP:100,desc:'Your beast hatched! It\'s tiny and adorable, chirping happily. Keep feeding it knowledge!'},
+  {name:'Teen Beast',sprite:'&#129418;',minXP:350,desc:'Your beast is growing into a curious little explorer! It loves watching you study.'},
+  {name:'Adult Beast',sprite:'&#129409;',minXP:800,desc:'A majestic study companion! Your beast purrs with pride at your dedication.'},
+  {name:'Legendary Beast',sprite:'&#128050;',minXP:1500,desc:'A LEGENDARY beast! Few students ever raise one this powerful. You are a true scholar.'}
 ];
 const PET_MOODS=[
   {name:'Ecstatic',icon:'&#128525;',min:80,color:'var(--accent4)'},
