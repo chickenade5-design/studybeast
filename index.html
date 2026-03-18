@@ -1375,12 +1375,23 @@ function saveRoomState(){
   }
 }
 function loadRoomState(){return JSON.parse(sessionStorage.getItem('sb_room')||'null')}
-async function autoRejoinRoom(){
+async function autoRejoinRoom(retries){
+  retries=retries||0;
   const rs=loadRoomState();
   if(!rs){console.log('[Room] No saved room state');return}
-  console.log('[Room] Rejoining room',rs.code,'as',rs.myId);
+  console.log('[Room] Rejoining room',rs.code,'as',rs.myId,'attempt',retries+1);
   document.getElementById('roomName').value=rs.name||'';
-  try{await connectWS()}catch(e){console.log('[Room] WS connect failed',e);sessionStorage.removeItem('sb_room');return}
+  try{await connectWS()}catch(e){
+    console.log('[Room] WS connect failed',e);
+    if(retries<3){
+      console.log('[Room] Retrying in '+(2+retries)+'s...');
+      setTimeout(()=>autoRejoinRoom(retries+1),(2+retries)*1000);
+    }else{
+      sessionStorage.removeItem('sb_room');
+      toast('Could not reconnect to room. Please rejoin.');
+    }
+    return;
+  }
   roomCode=rs.code;
   roomMyId=rs.myId;
   const st=getMyStatus();
@@ -1400,17 +1411,28 @@ function getMyStatus(){
   return{name:getMyName(),color:getMyColor(),status,timer,level:D.level,streak:D.streak,xp:D.xp,ts:Date.now(),petName:pet.name,petStage:petStage.name}
 }
 
+let wsReconnectTimer=null;
 function connectWS(){
   return new Promise((res,rej)=>{
     if(ws&&ws.readyState===WebSocket.OPEN)return res(ws);
+    if(ws){try{ws.close()}catch(e){}}
     ws=new WebSocket(RELAY_URL);
     ws.onopen=()=>res(ws);
     ws.onerror=()=>rej(new Error('Connection failed'));
-    ws.onclose=()=>{ws=null};
+    ws.onclose=()=>{
+      ws=null;
+      // Auto-reconnect if we're in a room
+      if(roomCode&&roomMyId&&!wsReconnectTimer){
+        wsReconnectTimer=setTimeout(()=>{
+          wsReconnectTimer=null;
+          autoRejoinRoom();
+        },2000);
+      }
+    };
     ws.onmessage=(e)=>{
       try{handleServerMsg(JSON.parse(e.data))}catch(err){}
     };
-    setTimeout(()=>rej(new Error('Connection timeout')),10000);
+    setTimeout(()=>rej(new Error('Connection timeout')),15000);
   });
 }
 
@@ -1436,7 +1458,10 @@ function handleServerMsg(msg){
     case 'error':
       toast(msg.msg||'Room not found. Check the code and try again.');
       roomCode='';roomMyId='';
+      if(roomStatusInterval){clearInterval(roomStatusInterval);roomStatusInterval=null}
       saveRoomState();
+      document.getElementById('roomLobby').style.display='block';
+      document.getElementById('roomActive').style.display='none';
       break;
     case 'members':
       roomMembers=msg.members||{};
@@ -1575,6 +1600,7 @@ function shareInvite(){
 
 function leaveRoom(){
   if(roomStatusInterval){clearInterval(roomStatusInterval);roomStatusInterval=null}
+  if(wsReconnectTimer){clearTimeout(wsReconnectTimer);wsReconnectTimer=null}
   wsSend({type:'leave'});
   roomMembers={};roomCode='';roomMyId='';chatSeen.clear();
   saveRoomState();

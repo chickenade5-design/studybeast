@@ -4,7 +4,7 @@ const { WebSocketServer } = require('ws');
 const port = process.env.PORT || 3000;
 const rooms = new Map(); // roomCode -> { active, members: Map, chat: [], disconnectTimers: Map }
 const clients = new Map(); // ws -> { room, userId }
-const REJOIN_GRACE_MS = 15000; // 15 seconds to reconnect before being removed
+const REJOIN_GRACE_MS = 120000; // 2 minutes to reconnect before being removed
 
 const server = http.createServer((req, res) => {
   res.writeHead(200, {
