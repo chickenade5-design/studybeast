@@ -1922,10 +1922,12 @@ const _origAddXP=addXP;
 addXP=function(n){
   const lvBefore=D.level;
   _origAddXP(n);
-  // Give pet XP for studying
-  if(n>=25){addPetXP(3)} // pomo-sized reward
-  else if(n>=10){addPetXP(2)} // quiz/journal
-  else{addPetXP(1)} // small actions
+  // Give pet XP scaled by activity size
+  if(n>=60){addPetXP(8)}       // long session (60+ min count-up/focus lock)
+  else if(n>=30){addPetXP(5)}  // medium session (30+ min count-up/stopwatch)
+  else if(n>=25){addPetXP(3)}  // pomo-sized reward
+  else if(n>=10){addPetXP(2)}  // quiz/journal
+  else{addPetXP(1)}            // small actions (cards, habits, tasks)
   // Level up bonus
   if(D.level>lvBefore){addPetXP(10)}
 };
