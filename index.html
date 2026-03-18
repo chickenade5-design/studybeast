@@ -319,6 +319,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 .pet-xp-bar{width:160px;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin:6px auto 0}
 .pet-xp-fill{height:100%;background:linear-gradient(90deg,var(--accent4),var(--accent2));border-radius:3px;transition:width 0.6s}
 .pet-xp-label{font-size:0.68rem;color:var(--muted);margin-top:2px}
+.pet-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pet-type-card{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px;text-align:center;cursor:pointer;transition:all 0.25s}
+.pet-type-card:hover{border-color:var(--accent1);transform:translateY(-4px);box-shadow:0 12px 30px rgba(124,58,237,0.2)}
 /* Mobile bottom nav */
 .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--sidebar);backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:10;padding:6px 0 env(safe-area-inset-bottom,6px);overflow-x:auto}
 .bottom-nav-inner{display:flex;justify-content:space-around;min-width:100%}
@@ -713,6 +716,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <!-- STUDY PET -->
 <div class="panel" id="p-pet">
 <div class="header"><h2>Study Pet</h2></div>
+<div id="petChooser" class="glass" style="max-width:600px;margin:0 auto"></div>
+<div id="petMain">
 <div class="g2">
 <div class="glass">
 <div class="pet-container">
@@ -746,6 +751,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div style="margin-top:16px">
 <h3 style="font-size:0.92rem;margin-bottom:8px">Evolution Stages</h3>
 <div id="petEvoTimeline" style="font-size:0.82rem;line-height:2.2"></div>
+</div>
+<div style="margin-top:16px">
+<h3 style="font-size:0.92rem;margin-bottom:8px">Switch Pet Type</h3>
+<div id="petChangeType" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+<div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Your XP carries over when switching!</div>
+</div>
 </div>
 </div>
 </div>
@@ -1341,7 +1352,7 @@ function getMyStatus(){
   const pEl=document.getElementById('pTime');
   let status='Idle', timer='';
   if(pEl&&pEl.textContent!=='00:00'){status='Studying';timer=pEl.textContent}
-  const pet=getPet();const petStage=PET_STAGES[getPetStage()];
+  const pet=getPet();const petStage=getStagesForPet()[getPetStage()];
   return{name:getMyName(),color:getMyColor(),status,timer,level:D.level,streak:D.streak,xp:D.xp,ts:Date.now(),petName:pet.name,petSprite:petStage.sprite,petStage:petStage.name}
 }
 
@@ -1593,13 +1604,37 @@ function updFLReturnBtn(){
 }
 
 // ===== STUDY PET =====
-const PET_STAGES=[
-  {name:'Egg',sprite:'&#129370;',minXP:0,desc:'A mysterious egg is glowing softly... Keep studying to hatch it!'},
-  {name:'Baby Beast',sprite:'&#128035;',minXP:100,desc:'Your beast hatched! It\'s tiny and adorable, chirping happily. Keep feeding it knowledge!'},
-  {name:'Teen Beast',sprite:'&#129418;',minXP:350,desc:'Your beast is growing into a curious little explorer! It loves watching you study.'},
-  {name:'Adult Beast',sprite:'&#129409;',minXP:800,desc:'A majestic study companion! Your beast purrs with pride at your dedication.'},
-  {name:'Legendary Beast',sprite:'&#128050;',minXP:1500,desc:'A LEGENDARY beast! Few students ever raise one this powerful. You are a true scholar.'}
-];
+const PET_TYPES={
+  dragon:{name:'Dragon',icon:'&#128050;',stages:[
+    {name:'Egg',sprite:'&#129370;',minXP:0,desc:'A warm, scaly egg glows faintly... something powerful stirs within.'},
+    {name:'Hatchling',sprite:'&#129422;',minXP:100,desc:'A tiny lizard emerges! It\'s small but already breathing little sparks.'},
+    {name:'Drake',sprite:'&#128010;',minXP:350,desc:'Your drake is growing scales and claws. It perches on your desk while you study!'},
+    {name:'Dragon',sprite:'&#128009;',minXP:800,desc:'A fearsome dragon! It guards your study space and roars when you finish a session.'},
+    {name:'Elder Dragon',sprite:'&#128050;',minXP:1500,desc:'An ELDER DRAGON! Ancient, wise, and impossibly powerful. A true scholar\'s companion.'}
+  ]},
+  cat:{name:'Cat',icon:'&#128049;',stages:[
+    {name:'Egg',sprite:'&#129370;',minXP:0,desc:'A soft, fuzzy egg purrs gently when you touch it...'},
+    {name:'Kitten',sprite:'&#128049;',minXP:100,desc:'A tiny kitten with big eyes! It bats at your flashcards playfully.'},
+    {name:'Cat',sprite:'&#128008;',minXP:350,desc:'A sleek cat that curls up beside you during study sessions. So cozy!'},
+    {name:'Panther',sprite:'&#128062;',minXP:800,desc:'A majestic panther! Silent and powerful, it watches over your studies with golden eyes.'},
+    {name:'Lion',sprite:'&#129409;',minXP:1500,desc:'The KING of beasts! Your lion roars with pride at every achievement. Legendary!'}
+  ]},
+  bird:{name:'Bird',icon:'&#129413;',stages:[
+    {name:'Egg',sprite:'&#129370;',minXP:0,desc:'A speckled egg sits in a tiny nest... you hear faint chirping inside.'},
+    {name:'Chick',sprite:'&#128035;',minXP:100,desc:'A fluffy chick! It chirps excitedly whenever you review flashcards.'},
+    {name:'Songbird',sprite:'&#128038;',minXP:350,desc:'A colorful songbird that sings melodies while you focus. Beautiful!'},
+    {name:'Owl',sprite:'&#129417;',minXP:800,desc:'A wise owl! It hoots approvingly when you get quiz answers right.'},
+    {name:'Eagle',sprite:'&#129413;',minXP:1500,desc:'A LEGENDARY eagle! It soars above all others. The sky is yours, scholar!'}
+  ]},
+  ocean:{name:'Ocean',icon:'&#128011;',stages:[
+    {name:'Egg',sprite:'&#129370;',minXP:0,desc:'A shimmering bubble floats gently... something swims inside.'},
+    {name:'Guppy',sprite:'&#128032;',minXP:100,desc:'A tiny tropical fish! It blows happy bubbles when you complete tasks.'},
+    {name:'Dolphin',sprite:'&#128044;',minXP:350,desc:'A playful dolphin! It leaps and spins when you hit study streaks.'},
+    {name:'Shark',sprite:'&#129416;',minXP:800,desc:'A powerful shark! Nothing gets past those jaws — just like your study habits.'},
+    {name:'Whale',sprite:'&#128011;',minXP:1500,desc:'A LEGENDARY whale! Majestic ruler of the deep. Your knowledge is as vast as the ocean.'}
+  ]}
+};
+function getStagesForPet(){const pet=getPet();return (PET_TYPES[pet.type]||PET_TYPES.dragon).stages}
 const PET_MOODS=[
   {name:'Ecstatic',icon:'&#128525;',min:80,color:'var(--accent4)'},
   {name:'Happy',icon:'&#128522;',min:60,color:'var(--accent2)'},
@@ -1612,9 +1647,9 @@ function getPet(){
   return D.pet;
 }
 function getPetStage(){
-  const pet=getPet();
+  const pet=getPet();const stages=getStagesForPet();
   let stage=0;
-  for(let i=PET_STAGES.length-1;i>=0;i--){if(pet.xp>=PET_STAGES[i].minXP){stage=i;break}}
+  for(let i=stages.length-1;i>=0;i--){if(pet.xp>=stages[i].minXP){stage=i;break}}
   return stage;
 }
 function getPetMood(){
@@ -1649,18 +1684,26 @@ function calcPetMood(){
   return pet.mood;
 }
 function addPetXP(n){
-  const pet=getPet();
+  const pet=getPet();const stages=getStagesForPet();
   const oldStage=getPetStage();
   pet.xp+=n;
   const newStage=getPetStage();
   if(newStage>oldStage){
-    toast(`Your pet evolved into ${PET_STAGES[newStage].name}!`);
+    toast(`Your pet evolved into ${stages[newStage].name}!`);
     confetti();
     sfx(880,0.4);
     const el=document.getElementById('petSprite');
     if(el){el.classList.add('pet-evo-flash');setTimeout(()=>el.classList.remove('pet-evo-flash'),1500)}
   }
   sv();
+}
+function choosePetType(type){
+  const pet=getPet();
+  pet.type=type;
+  sv();
+  renPet();
+  toast('You chose the '+PET_TYPES[type].name+' line!');
+  sfx(660,0.2);
 }
 function petFeed(){
   const pet=getPet();
@@ -1716,16 +1759,34 @@ function renamePet(){
   renPet();
 }
 function renPet(){
-  const pet=getPet();
+  const pet=getPet();const stages=getStagesForPet();
   const stage=getPetStage();
-  const stageData=PET_STAGES[stage];
+  const stageData=stages[stage];
   const mood=calcPetMood();
   const moodData=getPetMood();
-  const nextStage=PET_STAGES[stage+1];
-  const xpForNext=nextStage?nextStage.minXP:stageData.minXP;
+  const nextStage=stages[stage+1];
   const xpInStage=pet.xp-stageData.minXP;
   const xpNeeded=nextStage?(nextStage.minXP-stageData.minXP):1;
   const xpPct=nextStage?Math.min(100,Math.round(xpInStage/xpNeeded*100)):100;
+
+  // Show type chooser if no type selected
+  const chooser=document.getElementById('petChooser');
+  const petMain=document.getElementById('petMain');
+  if(chooser&&petMain){
+    if(!pet.type){
+      chooser.style.display='';
+      petMain.style.display='none';
+      chooser.innerHTML='<h3 style="text-align:center;margin-bottom:6px">Choose Your Beast!</h3><p style="text-align:center;color:var(--muted);font-size:0.88rem;margin-bottom:16px">Pick a creature to raise. Each has a unique evolution path!</p><div class="pet-type-grid">'+
+        Object.entries(PET_TYPES).map(([key,t])=>`<div class="pet-type-card" onclick="choosePetType('${key}')"><div style="font-size:3rem;margin-bottom:6px">${t.icon}</div><div style="font-weight:700;margin-bottom:4px">${t.name}</div><div style="font-size:0.72rem;color:var(--muted);line-height:1.4">${t.stages.map(s=>s.sprite).join(' → ')}</div><div style="font-size:0.7rem;color:var(--muted);margin-top:4px">${t.stages.map(s=>s.name).join(' → ')}</div></div>`).join('')+'</div>';
+      // Still update dashboard widget with egg
+      const dashSprite=document.getElementById('dashPetSprite');if(dashSprite)dashSprite.innerHTML='&#129370;';
+      const dashName=document.getElementById('dashPetName');if(dashName)dashName.textContent='Choose your pet!';
+      const dashStatus=document.getElementById('dashPetStatus');if(dashStatus)dashStatus.textContent='Tap to pick a beast to raise!';
+      return;
+    }
+    chooser.style.display='none';
+    petMain.style.display='';
+  }
 
   // Pet page elements
   const sprite=document.getElementById('petSprite');
@@ -1737,7 +1798,8 @@ function renPet(){
     else if(mood<40)sprite.classList.add('sleepy');
   }
   const nameEl=document.getElementById('petName');if(nameEl)nameEl.textContent=pet.name;
-  const stageEl=document.getElementById('petStage');if(stageEl)stageEl.textContent=`${stageData.name} \u00B7 Stage ${stage+1}/5`;
+  const typeInfo=PET_TYPES[pet.type]||PET_TYPES.dragon;
+  const stageEl=document.getElementById('petStage');if(stageEl)stageEl.textContent=`${stageData.name} \u00B7 ${typeInfo.name} Line \u00B7 Stage ${stage+1}/5`;
   const moodIcon=document.getElementById('petMoodIcon');if(moodIcon)moodIcon.innerHTML=moodData.icon;
   const moodFill=document.getElementById('petMoodFill');if(moodFill){moodFill.style.width=mood+'%';moodFill.style.background=moodData.color}
   const moodText=document.getElementById('petMoodText');if(moodText)moodText.textContent=moodData.name;
@@ -1756,11 +1818,15 @@ function renPet(){
 
   // Info panel
   const info=document.getElementById('petInfo');
-  if(info)info.innerHTML=`<div style="margin-bottom:8px">${stageData.desc}</div><div><strong>Mood:</strong> ${moodData.name} (${mood}%)</div><div><strong>Total Pet XP:</strong> ${pet.xp}</div><div><strong>How to earn Pet XP:</strong></div><div style="padding-left:12px">&#8226; Study activities: +1 Pet XP per action<br>&#8226; Complete daily challenge & feed: +15 Pet XP<br>&#8226; Every 10 pats: +2 Pet XP<br>&#8226; Pomodoro session: +3 Pet XP<br>&#8226; Level up: +10 Pet XP</div>`;
+  if(info)info.innerHTML=`<div style="margin-bottom:8px">${stageData.desc}</div><div><strong>Mood:</strong> ${moodData.name} (${mood}%)</div><div><strong>Total Pet XP:</strong> ${pet.xp}</div><div><strong>Type:</strong> ${typeInfo.name}</div><div style="margin-top:8px"><strong>How to earn Pet XP:</strong></div><div style="padding-left:12px">&#8226; Study activities: +1 Pet XP per action<br>&#8226; Complete daily challenge & feed: +15 Pet XP<br>&#8226; Every 10 pats: +2 Pet XP<br>&#8226; Pomodoro session: +3 Pet XP<br>&#8226; Level up: +10 Pet XP</div>`;
 
   // Evolution timeline
   const timeline=document.getElementById('petEvoTimeline');
-  if(timeline)timeline.innerHTML=PET_STAGES.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;${i<=stage?'':'opacity:0.35'}">${s.sprite} <strong>${s.name}</strong> <span style="color:var(--muted)">(${s.minXP} XP)</span> ${i===stage?'<span style="color:var(--accent4);font-size:0.75rem">&#9668; Current</span>':i<stage?'<span style="color:var(--accent4)">&#10003;</span>':''}</div>`).join('');
+  if(timeline)timeline.innerHTML=stages.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;${i<=stage?'':'opacity:0.35'}">${s.sprite} <strong>${s.name}</strong> <span style="color:var(--muted)">(${s.minXP} XP)</span> ${i===stage?'<span style="color:var(--accent4);font-size:0.75rem">&#9668; Current</span>':i<stage?'<span style="color:var(--accent4)">&#10003;</span>':''}</div>`).join('');
+
+  // Change type button
+  const changeType=document.getElementById('petChangeType');
+  if(changeType)changeType.innerHTML=Object.entries(PET_TYPES).map(([key,t])=>`<button class="btn ${pet.type===key?'btn-p':'btn-g'} btn-s" onclick="choosePetType('${key}')" style="font-size:0.78rem">${t.icon} ${t.name}</button>`).join('');
 
   // Dashboard mini widget
   const dashSprite=document.getElementById('dashPetSprite');if(dashSprite)dashSprite.innerHTML=stageData.sprite;
