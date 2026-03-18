@@ -874,11 +874,12 @@ async function doLogin(){
   if(!user||!pass){err.textContent='Please fill in all fields';return}
   if(user.length<2){err.textContent='Username must be at least 2 characters';return}
   if(pass.length<4){err.textContent='Password must be at least 4 characters';return}
-  const hash=await hashPass(pass);
+  let hash;
+  try{hash=await hashPass(pass)}catch(e){err.textContent='Error: please use HTTPS or a modern browser';return}
   const users=getUsers();
   if(loginMode==='signup'){
-    const confirm=document.getElementById('loginConfirm').value;
-    if(pass!==confirm){err.textContent='Passwords do not match';return}
+    const confirmVal=document.getElementById('loginConfirm').value;
+    if(pass!==confirmVal){err.textContent='Passwords do not match';return}
     if(users[user]){err.textContent='Username already taken';return}
     users[user]={hash,created:Date.now()};
     saveUsers(users);
@@ -886,7 +887,7 @@ async function doLogin(){
     localStorage.setItem('sb_current_user',user);
     D=ld();sv();
     document.getElementById('loginOverlay').style.display='none';
-    initApp();
+    try{initApp()}catch(e){console.error('Init error:',e)}
   } else {
     if(!users[user]){err.textContent='Account not found';return}
     if(users[user].hash!==hash){err.textContent='Incorrect password';return}
@@ -894,7 +895,7 @@ async function doLogin(){
     localStorage.setItem('sb_current_user',user);
     D=ld();
     document.getElementById('loginOverlay').style.display='none';
-    initApp();
+    try{initApp()}catch(e){console.error('Init error:',e)}
   }
 }
 function doLogout(){
@@ -1832,6 +1833,9 @@ function renamePet(){
   renPet();
 }
 function renPet(){
+  try{ _renPetInner() }catch(e){console.error('renPet error:',e)}
+}
+function _renPetInner(){
   const pet=getPet();const stages=getStagesForPet();
   const stage=getPetStage();
   const stageData=stages[stage];
@@ -1928,10 +1932,12 @@ addXP=function(n){
 
 // ===== INIT =====
 function initApp(){
-  D=ld();
-  document.documentElement.setAttribute('data-theme',D.settings.theme||'midnight');
-  getPet(); // ensure pet data exists
-  updDash();updPD();renDk();renN();renT();renPLog();renHab();renGoals();renAmb();renJournal();updAutoBtn();updCUTarget();renCUSessions();
+  try{
+    D=ld();
+    document.documentElement.setAttribute('data-theme',D.settings.theme||'midnight');
+    getPet();
+    updDash();updPD();renDk();renN();renT();renPLog();renHab();renGoals();renAmb();renJournal();updAutoBtn();updCUTarget();renCUSessions();
+  }catch(e){console.error('initApp error:',e)}
 }
 document.documentElement.setAttribute('data-theme',D.settings.theme||'midnight');
 if(authUser){initApp()}
