@@ -202,6 +202,38 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .login-user-info{display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--muted)}
 .login-user-info .user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.78rem}
 
+/* Focus Lock */
+.fl-overlay{display:none;position:fixed;inset:0;z-index:400;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.fl-overlay.active{display:flex}
+.fl-overlay .fl-shield{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(124,58,237,0.06) 0%,transparent 70%)}
+.fl-timer{font-size:5rem;font-weight:900;font-variant-numeric:tabular-nums;background:linear-gradient(135deg,var(--accent1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative;z-index:1}
+.fl-label{font-size:1.1rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:3px;position:relative;z-index:1}
+.fl-quote{max-width:500px;font-size:1rem;line-height:1.6;font-style:italic;color:var(--muted);margin-top:30px;position:relative;z-index:1}
+.fl-quote .qa{font-style:normal;font-size:0.84rem;color:var(--accent1);margin-top:8px;font-weight:600}
+.fl-tools{display:flex;gap:10px;margin-top:24px;position:relative;z-index:1;flex-wrap:wrap;justify-content:center}
+.fl-tools .btn{padding:10px 20px}
+.fl-exit{position:absolute;top:20px;right:20px;z-index:2}
+.fl-exit-confirm{display:none;position:fixed;inset:0;z-index:450;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center}
+.fl-exit-confirm.open{display:flex}
+.fl-exit-box{background:#15152a;border:1px solid var(--border);border-radius:18px;padding:28px;width:90%;max-width:400px;text-align:center;animation:fadeUp 0.3s ease}
+.fl-exit-box h3{margin-bottom:8px;color:var(--accent3)}
+.fl-exit-box p{color:var(--muted);font-size:0.88rem;margin-bottom:16px}
+.fl-exit-box input{width:100%;padding:10px;margin-bottom:12px;text-align:center}
+.fl-streak-anim{animation:streakPulse 2s ease-in-out infinite;position:relative;z-index:1}
+@keyframes streakPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.03);filter:brightness(1.1)}}
+.fl-progress{width:80%;max-width:400px;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-top:16px;position:relative;z-index:1}
+.fl-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent1),var(--accent2));border-radius:3px;transition:width 1s linear}
+.fl-blocked-msg{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(244,63,94,0.15);border:1px solid var(--accent3);color:var(--accent3);padding:10px 22px;border-radius:12px;font-size:0.88rem;z-index:500;animation:fadeUp 0.3s ease;pointer-events:none}
+
+/* Focus Lock Setup Modal */
+.fl-setup{max-width:440px}
+.fl-dur-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.fl-dur-opt{padding:16px 10px;background:var(--card);border:2px solid var(--border);border-radius:14px;cursor:pointer;text-align:center;transition:all 0.2s}
+.fl-dur-opt:hover{border-color:var(--accent1);transform:translateY(-2px)}
+.fl-dur-opt.selected{border-color:var(--accent1);background:rgba(124,58,237,0.12);box-shadow:0 0 20px rgba(124,58,237,0.15)}
+.fl-dur-opt .fl-dur-val{font-size:1.5rem;font-weight:800;color:var(--accent1)}
+.fl-dur-opt .fl-dur-lbl{font-size:0.75rem;color:var(--muted);margin-top:2px}
+
 /* Search */
 .search-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:200;align-items:flex-start;justify-content:center;padding-top:15vh}
 .search-overlay.open{display:flex}
@@ -340,6 +372,57 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 </div>
 </div>
 
+<!-- Focus Lock Overlay -->
+<div class="fl-overlay" id="flOverlay">
+<div class="fl-shield"></div>
+<div class="fl-exit"><button class="btn btn-g" onclick="tryExitFL()">Exit Lock</button></div>
+<div class="fl-streak-anim" id="flStreakIcon" style="font-size:2.5rem;margin-bottom:8px">&#128274;</div>
+<div class="fl-timer" id="flTimer">00:00</div>
+<div class="fl-label" id="flLabel">Focus Locked</div>
+<div class="fl-progress"><div class="fl-progress-fill" id="flProgressFill" style="width:0%"></div></div>
+<div class="fl-quote" id="flQuote"></div>
+<div class="fl-tools">
+<button class="btn btn-p" onclick="flGoTo('pomo')">Pomodoro</button>
+<button class="btn btn-g" onclick="flGoTo('fc')">Flashcards</button>
+<button class="btn btn-g" onclick="flGoTo('notes')">Notes</button>
+<button class="btn btn-g" onclick="flGoTo('cu')">Count Up</button>
+<button class="btn btn-g" onclick="flGoTo('quiz')">Quiz</button>
+<button class="btn btn-g" onclick="flGoTo('tasks')">Tasks</button>
+</div>
+</div>
+
+<!-- Focus Lock Exit Confirmation -->
+<div class="fl-exit-confirm" id="flExitConfirm" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="fl-exit-box">
+<h3>Are you sure?</h3>
+<p>You're doing great! Leaving early means no bonus XP. To quit, type <strong>quit</strong> below.</p>
+<input type="text" id="flExitInput" placeholder='Type "quit" to confirm' onkeydown="if(event.key==='Enter')confirmExitFL()">
+<div style="display:flex;gap:10px;justify-content:center">
+<button class="btn btn-p" onclick="document.getElementById('flExitConfirm').classList.remove('open')">Keep Studying</button>
+<button class="btn btn-d" onclick="confirmExitFL()">Quit</button>
+</div>
+</div>
+</div>
+
+<!-- Focus Lock Setup Modal -->
+<div class="mo" id="flSetupM"><div class="md fl-setup">
+<h3>Focus Lock</h3>
+<p style="color:var(--muted);font-size:0.88rem;margin-bottom:6px">Lock yourself in and eliminate distractions. Choose your session length:</p>
+<div class="fl-dur-grid">
+<div class="fl-dur-opt" onclick="selFLDur(15,this)"><div class="fl-dur-val">15</div><div class="fl-dur-lbl">minutes</div></div>
+<div class="fl-dur-opt" onclick="selFLDur(30,this)"><div class="fl-dur-val">30</div><div class="fl-dur-lbl">minutes</div></div>
+<div class="fl-dur-opt selected" onclick="selFLDur(45,this)"><div class="fl-dur-val">45</div><div class="fl-dur-lbl">minutes</div></div>
+<div class="fl-dur-opt" onclick="selFLDur(60,this)"><div class="fl-dur-val">60</div><div class="fl-dur-lbl">minutes</div></div>
+<div class="fl-dur-opt" onclick="selFLDur(90,this)"><div class="fl-dur-val">90</div><div class="fl-dur-lbl">minutes</div></div>
+<div class="fl-dur-opt" onclick="selFLDur(120,this)"><div class="fl-dur-val">120</div><div class="fl-dur-lbl">minutes</div></div>
+</div>
+<div class="fg"><label>Or custom (minutes)</label><input type="number" id="flCustomDur" min="5" max="480" value="45" onchange="selFLDur(parseInt(this.value)||45)"></div>
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px">
+<button class="btn btn-g" onclick="closeM('flSetupM')">Cancel</button>
+<button class="btn btn-p" onclick="startFL()">&#128274; Lock In</button>
+</div>
+</div></div>
+
 <!-- Search Overlay -->
 <div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch()">
 <div class="search-box"><input type="text" id="searchInput" placeholder="Search notes, cards, tasks... (Ctrl+K)" oninput="doSearch(this.value)"><div class="search-results" id="searchResults"></div></div>
@@ -414,7 +497,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="glass"><h3 style="font-size:0.92rem;margin-bottom:8px">Activity (12 weeks)</h3><div class="act-grid" id="actGrid"></div></div>
 <div class="glass"><div id="dashQ" class="qb" style="padding:8px;font-size:0.95rem"></div>
 <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
-<button class="btn btn-p" onclick="enterFocus()" style="justify-content:center">Enter Focus Mode</button>
+<button class="btn btn-p" onclick="openM('flSetupM')" style="justify-content:center">&#128274; Focus Lock</button>
+<button class="btn btn-g" onclick="enterFocus()" style="justify-content:center">Enter Focus Mode</button>
 <button class="btn btn-g" onclick="go('fc')" style="justify-content:center">Review Flashcards</button>
 <button class="btn btn-g" onclick="go('quiz')" style="justify-content:center">Take a Quiz</button>
 </div></div>
@@ -813,6 +897,97 @@ function updDash(){
 function enterFocus(){document.getElementById('focusOverlay').classList.add('active');showQ(document.getElementById('focusQ'));updFocus()}
 function exitFocus(){document.getElementById('focusOverlay').classList.remove('active')}
 function updFocus(){const m=Math.floor(pomo.tl/60),s=pomo.tl%60;document.getElementById('focusTime').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;document.getElementById('focusLbl').textContent=pomo.mode==='focus'?'Focus':pomo.mode==='short'?'Short Break':'Long Break'}
+
+// ===== FOCUS LOCK =====
+let fl={on:false,dur:45,tl:0,iv:null,startTime:0,quoteIv:null};
+function selFLDur(min,btn){
+  fl.dur=Math.max(5,Math.min(480,min));
+  document.getElementById('flCustomDur').value=fl.dur;
+  document.querySelectorAll('.fl-dur-opt').forEach(b=>b.classList.remove('selected'));
+  if(btn)btn.classList.add('selected');
+}
+function startFL(){
+  closeM('flSetupM');
+  fl.on=true;fl.tl=fl.dur*60;fl.startTime=Date.now();
+  document.getElementById('flOverlay').classList.add('active');
+  showQ(document.getElementById('flQuote'));
+  fl.quoteIv=setInterval(()=>showQ(document.getElementById('flQuote')),30000);
+  updFLTimer();
+  fl.iv=setInterval(()=>{
+    fl.tl--;
+    updFLTimer();
+    if(fl.tl<=0){completedFL()}
+  },1000);
+  window.addEventListener('beforeunload',flBeforeUnload);
+  toast('Focus Lock activated! Stay focused!');sfx(660,0.2);
+}
+function updFLTimer(){
+  const m=Math.floor(fl.tl/60),s=fl.tl%60;
+  document.getElementById('flTimer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const elapsed=fl.dur*60-fl.tl;
+  const pct=Math.min(100,(elapsed/(fl.dur*60))*100);
+  document.getElementById('flProgressFill').style.width=pct+'%';
+  const left=fl.tl;
+  if(left>3600){const h=Math.floor(left/3600),mn=Math.floor((left%3600)/60);document.getElementById('flLabel').textContent=`${h}h ${mn}m remaining`}
+  else if(left>60){document.getElementById('flLabel').textContent=`${Math.ceil(left/60)} minutes remaining`}
+  else if(left>0){document.getElementById('flLabel').textContent=`${left} seconds remaining`}
+  else{document.getElementById('flLabel').textContent='Complete!'}
+}
+function completedFL(){
+  clearInterval(fl.iv);clearInterval(fl.quoteIv);fl.on=false;
+  window.removeEventListener('beforeunload',flBeforeUnload);
+  document.getElementById('flTimer').textContent='Done!';
+  document.getElementById('flLabel').textContent='Amazing work!';
+  document.getElementById('flStreakIcon').textContent='&#127942;';
+  document.getElementById('flProgressFill').style.width='100%';
+  const bonus=Math.round(fl.dur*1.5);
+  D.studyMinutes+=fl.dur;const t=today();D.dailyMinutes[t]=(D.dailyMinutes[t]||0)+fl.dur;
+  addXP(bonus);recAct();updGoals('minutes',fl.dur);sv();
+  toast(`Focus Lock complete! +${bonus} XP bonus!`);sfx(880,0.4);confetti();
+  notify('Focus Lock','Session complete! Amazing discipline!');
+  setTimeout(()=>{
+    document.getElementById('flOverlay').classList.remove('active');
+    document.getElementById('flStreakIcon').textContent='&#128274;';
+    const rb=document.getElementById('flReturnBtn');if(rb)rb.style.display='none';
+    go('dash');
+  },4000);
+}
+function tryExitFL(){
+  document.getElementById('flExitInput').value='';
+  document.getElementById('flExitConfirm').classList.add('open');
+  setTimeout(()=>document.getElementById('flExitInput').focus(),100);
+}
+function confirmExitFL(){
+  const inp=document.getElementById('flExitInput').value.trim().toLowerCase();
+  if(inp!=='quit'){toast('Type "quit" to confirm exit');return}
+  clearInterval(fl.iv);clearInterval(fl.quoteIv);fl.on=false;
+  window.removeEventListener('beforeunload',flBeforeUnload);
+  document.getElementById('flExitConfirm').classList.remove('open');
+  document.getElementById('flOverlay').classList.remove('active');
+  const elapsed=Math.round((Date.now()-fl.startTime)/60000);
+  if(elapsed>0){D.studyMinutes+=elapsed;const t=today();D.dailyMinutes[t]=(D.dailyMinutes[t]||0)+elapsed;addXP(elapsed);recAct();updGoals('minutes',elapsed);sv()}
+  const rb=document.getElementById('flReturnBtn');if(rb)rb.style.display='none';
+  toast(elapsed>0?`Exited early. ${elapsed} minutes logged.`:'Focus Lock cancelled.');
+}
+function flBeforeUnload(e){if(fl.on){e.preventDefault();e.returnValue='Focus Lock is active! Are you sure you want to leave?'}}
+function flGoTo(panel){
+  document.getElementById('flOverlay').classList.remove('active');
+  _originalGo(panel);
+  updFLReturnBtn();
+}
+function flReturn(){
+  if(fl.on)document.getElementById('flOverlay').classList.add('active');
+}
+let flBlockedTimeout;
+function showBlockedMsg(){
+  if(flBlockedTimeout)clearTimeout(flBlockedTimeout);
+  let msg=document.getElementById('flBlockedMsg');
+  if(!msg){msg=document.createElement('div');msg.className='fl-blocked-msg';msg.id='flBlockedMsg';document.body.appendChild(msg)}
+  const msgs=['Stay focused! You got this!','No distractions! Keep studying!','Eyes on the prize!','Almost there, keep going!','Your future self will thank you!'];
+  msg.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  msg.style.display='';
+  flBlockedTimeout=setTimeout(()=>msg.style.display='none',2500);
+}
 
 // ===== POMODORO =====
 let pomo={on:false,mode:'focus',tl:25*60,total:25*60,iv:null,sess:0};
@@ -1310,6 +1485,22 @@ document.addEventListener('keydown',e=>{
   if(e.key===' '&&document.getElementById('p-fc').classList.contains('active')){e.preventDefault();flipC()}
 });
 document.querySelectorAll('.mo').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')})});
+
+// ===== FOCUS LOCK PANEL GUARD =====
+const _originalGo=go;
+const flAllowed=['pomo','fc','notes','cu','quiz','tasks','sw'];
+go=function(n){
+  if(fl.on&&!flAllowed.includes(n)){showBlockedMsg();return}
+  _originalGo(n);
+  updFLReturnBtn();
+};
+function updFLReturnBtn(){
+  let rb=document.getElementById('flReturnBtn');
+  if(fl.on&&!document.getElementById('flOverlay').classList.contains('active')){
+    if(!rb){rb=document.createElement('button');rb.id='flReturnBtn';rb.className='btn btn-p';rb.style.cssText='position:fixed;bottom:80px;right:20px;z-index:60;box-shadow:0 4px 20px rgba(124,58,237,0.4);animation:fadeUp 0.3s ease';rb.innerHTML='&#128274; Back to Lock';rb.onclick=flReturn;document.body.appendChild(rb)}
+    rb.style.display='';
+  } else if(rb){rb.style.display='none'}
+}
 
 // ===== INIT =====
 function initApp(){
