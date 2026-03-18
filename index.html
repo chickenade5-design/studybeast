@@ -177,6 +177,31 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .laps{max-height:200px;overflow-y:auto;margin-top:14px}
 .lap{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.88rem}
 
+/* Count Up Timer */
+.cu-time{font-size:4.5rem;font-weight:900;text-align:center;font-variant-numeric:tabular-nums;background:linear-gradient(135deg,var(--accent1),var(--accent4));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.cu-target{font-size:0.85rem;color:var(--muted);text-align:center;margin-top:6px}
+.cu-progress{width:100%;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;margin-top:12px}
+.cu-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent1),var(--accent4));border-radius:4px;transition:width 0.5s}
+.cu-sessions{max-height:200px;overflow-y:auto;margin-top:14px}
+.cu-sess{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.85rem}
+
+/* Login */
+.login-overlay{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column}
+.login-overlay .bg-grid,.login-overlay .bg-orb{position:fixed}
+.login-box{background:var(--card);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:20px;padding:36px;width:90%;max-width:400px;z-index:1;animation:fadeUp 0.5s ease}
+.login-box h1{font-size:2rem;font-weight:900;text-align:center;margin-bottom:4px;background:linear-gradient(135deg,var(--accent1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.login-box .login-sub{text-align:center;color:var(--muted);font-size:0.88rem;margin-bottom:22px}
+.login-box .fg{margin-bottom:14px}
+.login-box .fg label{display:block;font-size:0.82rem;color:var(--muted);margin-bottom:5px}
+.login-box .fg input{width:100%;padding:11px 14px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);border-radius:12px;font-size:0.92rem;outline:none;transition:border-color 0.2s}
+.login-box .fg input:focus{border-color:var(--accent1)}
+.login-box .login-err{color:var(--accent3);font-size:0.82rem;text-align:center;margin-bottom:10px;min-height:20px}
+.login-toggle{text-align:center;margin-top:14px;font-size:0.85rem;color:var(--muted)}
+.login-toggle a{color:var(--accent1);cursor:pointer;text-decoration:none;font-weight:600}
+.login-toggle a:hover{text-decoration:underline}
+.login-user-info{display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--muted)}
+.login-user-info .user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.78rem}
+
 /* Search */
 .search-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:200;align-items:flex-start;justify-content:center;padding-top:15vh}
 .search-overlay.open{display:flex}
@@ -300,6 +325,21 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <body>
 <div class="bg-grid"></div><div class="bg-orb orb1"></div><div class="bg-orb orb2"></div>
 
+<!-- Login Overlay -->
+<div class="login-overlay" id="loginOverlay">
+<div class="bg-grid"></div><div class="bg-orb orb1"></div><div class="bg-orb orb2"></div>
+<div class="login-box">
+<h1>StudyBeast</h1>
+<div class="login-sub" id="loginSub">Sign in to your account</div>
+<div class="login-err" id="loginErr"></div>
+<div class="fg"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username" maxlength="30" onkeydown="if(event.key==='Enter')doLogin()"></div>
+<div class="fg"><label>Password</label><input type="password" id="loginPass" placeholder="Enter password" maxlength="50" onkeydown="if(event.key==='Enter')doLogin()"></div>
+<div class="fg" id="loginConfirmGroup" style="display:none"><label>Confirm Password</label><input type="password" id="loginConfirm" placeholder="Confirm password" maxlength="50" onkeydown="if(event.key==='Enter')doLogin()"></div>
+<button class="btn btn-p" style="width:100%;justify-content:center;padding:12px" id="loginBtn" onclick="doLogin()">Sign In</button>
+<div class="login-toggle" id="loginToggle">Don't have an account? <a onclick="toggleLoginMode()">Sign Up</a></div>
+</div>
+</div>
+
 <!-- Search Overlay -->
 <div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch()">
 <div class="search-box"><input type="text" id="searchInput" placeholder="Search notes, cards, tasks... (Ctrl+K)" oninput="doSearch(this.value)"><div class="search-results" id="searchResults"></div></div>
@@ -320,6 +360,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <button class="nav-btn active" data-p="dash" onclick="go('dash')"><span>&#9783;</span><span class="tt">Dashboard</span></button>
 <button class="nav-btn" data-p="pomo" onclick="go('pomo')"><span>&#9202;</span><span class="tt">Pomodoro</span></button>
 <button class="nav-btn" data-p="sw" onclick="go('sw')"><span>&#9201;</span><span class="tt">Stopwatch</span></button>
+<button class="nav-btn" data-p="cu" onclick="go('cu')"><span>&#9650;</span><span class="tt">Count Up</span></button>
 <button class="nav-btn" data-p="fc" onclick="go('fc')"><span>&#9879;</span><span class="tt">Flashcards</span></button>
 <button class="nav-btn" data-p="notes" onclick="go('notes')"><span>&#9998;</span><span class="tt">Notes</span></button>
 <button class="nav-btn" data-p="quiz" onclick="go('quiz')"><span>&#10067;</span><span class="tt">Quiz</span></button>
@@ -408,6 +449,30 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 </div>
 <div class="laps" id="swLaps"></div>
 </div></div>
+
+<!-- COUNT UP TIMER -->
+<div class="panel" id="p-cu">
+<div class="header"><h2>Count Up Timer</h2></div>
+<div class="glass" style="text-align:center;padding:30px">
+<div class="cu-time" id="cuDisplay">00:00:00</div>
+<div class="cu-target" id="cuTargetLabel"></div>
+<div class="cu-progress" id="cuProgressBar" style="display:none"><div class="cu-progress-fill" id="cuProgressFill" style="width:0%"></div></div>
+<div style="margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+<button class="btn btn-p" id="cuBtn" onclick="toggleCU()">Start</button>
+<button class="btn btn-g" onclick="resetCU()">Reset</button>
+<button class="btn btn-g" onclick="saveCUSession()">Save Session</button>
+</div>
+<div style="margin-top:16px;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap">
+<label style="font-size:0.82rem;color:var(--muted)">Target (min):</label>
+<input type="number" id="cuTarget" value="0" min="0" max="600" style="width:80px;text-align:center" onchange="updCUTarget()">
+<span style="font-size:0.75rem;color:var(--muted)">0 = no target</span>
+</div>
+</div>
+<div class="glass" style="margin-top:14px">
+<h3 style="font-size:0.92rem;margin-bottom:6px">Session History</h3>
+<div id="cuSessions" style="color:var(--muted);font-size:0.85rem">No sessions yet.</div>
+</div>
+</div>
 
 <!-- FLASHCARDS -->
 <div class="panel" id="p-fc">
@@ -563,6 +628,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="srow"><label>Notifications</label><button class="btn btn-g btn-s" onclick="reqNotif()">Enable</button></div>
 <div class="srow"><label>Backup Data</label><button class="btn btn-g btn-s" onclick="exportData()">Export JSON</button></div>
 <div class="srow"><label>Restore Data</label><input type="file" id="importFile" accept=".json" style="font-size:0.82rem" onchange="importData(event)"></div>
+<div class="srow"><label>Account</label><div class="login-user-info"><div class="user-avatar" id="settUserAv"></div><span id="settUserName"></span><button class="btn btn-d btn-s" onclick="doLogout()">Logout</button></div></div>
 <div class="srow"><label style="color:var(--accent3)">Reset All Data</label><button class="btn btn-d btn-s" onclick="resetAll()">Reset</button></div>
 </div>
 <div class="glass" style="margin-top:14px">
@@ -586,11 +652,78 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="mo" id="goalM"><div class="md"><h3>New Goal</h3><div class="fg"><label>Goal</label><input type="text" id="ngN" placeholder="Complete 100 cards"></div><div class="fg"><label>Target</label><input type="number" id="ngT" value="100" min="1"></div><div class="fg"><label>Track</label><select id="ngTy"><option value="cards">Cards</option><option value="pomos">Pomodoros</option><option value="quizzes">Quizzes</option><option value="minutes">Minutes</option><option value="manual">Manual</option></select></div><div style="display:flex;gap:7px;justify-content:flex-end"><button class="btn btn-g" onclick="closeM('goalM')">Cancel</button><button class="btn btn-p" onclick="addGoal()">Add</button></div></div></div>
 
 <script>
+// ===== AUTH =====
+let authUser=null;
+const AUTH_DB='sb_users';
+function getUsers(){try{return JSON.parse(localStorage.getItem(AUTH_DB))||{}}catch(e){return{}}}
+function saveUsers(u){localStorage.setItem(AUTH_DB,JSON.stringify(u))}
+async function hashPass(p){const enc=new TextEncoder().encode(p);const buf=await crypto.subtle.digest('SHA-256',enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+let loginMode='signin';
+function toggleLoginMode(){
+  loginMode=loginMode==='signin'?'signup':'signin';
+  document.getElementById('loginSub').textContent=loginMode==='signin'?'Sign in to your account':'Create a new account';
+  document.getElementById('loginBtn').textContent=loginMode==='signin'?'Sign In':'Sign Up';
+  document.getElementById('loginConfirmGroup').style.display=loginMode==='signup'?'':'none';
+  document.getElementById('loginToggle').innerHTML=loginMode==='signin'?"Don't have an account? <a onclick=\"toggleLoginMode()\">Sign Up</a>":"Already have an account? <a onclick=\"toggleLoginMode()\">Sign In</a>";
+  document.getElementById('loginErr').textContent='';
+}
+async function doLogin(){
+  const user=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const err=document.getElementById('loginErr');
+  if(!user||!pass){err.textContent='Please fill in all fields';return}
+  if(user.length<2){err.textContent='Username must be at least 2 characters';return}
+  if(pass.length<4){err.textContent='Password must be at least 4 characters';return}
+  const hash=await hashPass(pass);
+  const users=getUsers();
+  if(loginMode==='signup'){
+    const confirm=document.getElementById('loginConfirm').value;
+    if(pass!==confirm){err.textContent='Passwords do not match';return}
+    if(users[user]){err.textContent='Username already taken';return}
+    users[user]={hash,created:Date.now()};
+    saveUsers(users);
+    authUser=user;
+    localStorage.setItem('sb_current_user',user);
+    D=ld();sv();
+    document.getElementById('loginOverlay').style.display='none';
+    initApp();
+  } else {
+    if(!users[user]){err.textContent='Account not found';return}
+    if(users[user].hash!==hash){err.textContent='Incorrect password';return}
+    authUser=user;
+    localStorage.setItem('sb_current_user',user);
+    D=ld();
+    document.getElementById('loginOverlay').style.display='none';
+    initApp();
+  }
+}
+function doLogout(){
+  if(!confirm('Log out?'))return;
+  authUser=null;
+  localStorage.removeItem('sb_current_user');
+  document.getElementById('loginOverlay').style.display='';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginConfirm').value='';
+  document.getElementById('loginErr').textContent='';
+  loginMode='signin';toggleLoginMode();toggleLoginMode();
+}
+function getUserDB(){return authUser?'sb3_'+authUser:'sb3'}
+
+// Check if already logged in
+(function(){
+  const saved=localStorage.getItem('sb_current_user');
+  if(saved){
+    const users=getUsers();
+    if(users[saved]){authUser=saved;document.getElementById('loginOverlay').style.display='none'}
+  }
+})();
+
 // ===== DATA =====
-const DB='sb3';
+function getDBKey(){return authUser?'sb3_'+authUser:'sb3'}
 let D=ld();
-function ld(){try{const r=localStorage.getItem(DB);if(r){const d=JSON.parse(r);['habits','goals','dailyCards','dailyMinutes','journal','settings'].forEach(k=>{if(!d[k])d[k]=k==='settings'?{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false}:k==='journal'?[]:{}});if(!d.settings.autoStart)d.settings.autoStart=false;return d;}}catch(e){}return{xp:0,level:1,streak:0,lastStudy:null,cardsReviewed:0,pomosCompleted:0,quizCorrect:0,quizTotal:0,studyMinutes:0,activity:{},decks:[],notes:[],tasks:[],pomoLog:[],habits:[],goals:[],dailyCards:{},dailyMinutes:{},journal:[],settings:{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false}}}
-function sv(){localStorage.setItem(DB,JSON.stringify(D))}
+function ld(){const DB=getDBKey();try{const r=localStorage.getItem(DB);if(r){const d=JSON.parse(r);['habits','goals','dailyCards','dailyMinutes','journal','settings','cuSessions'].forEach(k=>{if(!d[k])d[k]=k==='settings'?{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false}:k==='journal'||k==='cuSessions'?[]:{}});if(!d.settings.autoStart)d.settings.autoStart=false;return d;}}catch(e){}return{xp:0,level:1,streak:0,lastStudy:null,cardsReviewed:0,pomosCompleted:0,quizCorrect:0,quizTotal:0,studyMinutes:0,activity:{},decks:[],notes:[],tasks:[],pomoLog:[],habits:[],goals:[],dailyCards:{},dailyMinutes:{},journal:[],cuSessions:[],settings:{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false}}}
+function sv(){localStorage.setItem(getDBKey(),JSON.stringify(D))}
 function today(){return new Date().toISOString().split('T')[0]}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 
@@ -636,6 +769,7 @@ function go(n){
   if(n==='habits')renHab();if(n==='goals')renGoals();if(n==='quiz')updQSel();
   if(n==='stats')renStats();if(n==='wb')initWB();if(n==='journal')renJournal();
   if(n==='ambient')renAmb();if(n==='room')renRoomMembers();if(n==='settings')renSett();
+  if(n==='cu'){updCUTarget();renCUSessions()}
 }
 function openM(id){document.getElementById(id).classList.add('open')}
 function closeM(id){document.getElementById(id).classList.remove('open')}
@@ -712,6 +846,71 @@ function lapSW(){if(!sw.on)return;const e=sw.elapsed+Date.now()-sw.start;sw.laps
 function resetSW(){clearInterval(sw.iv);sw.on=false;sw.elapsed=0;sw.laps=[];document.getElementById('swBtn').textContent='Start';document.getElementById('swDisplay').textContent='00:00:00';document.getElementById('swLaps').innerHTML='';
   // Log time
   if(sw.elapsed>60000){const mins=Math.round(sw.elapsed/60000);D.studyMinutes+=mins;const t=today();D.dailyMinutes[t]=(D.dailyMinutes[t]||0)+mins;addXP(mins);recAct();updGoals('minutes',mins);sv()}}
+
+// ===== COUNT UP TIMER =====
+let cu={on:false,start:0,elapsed:0,iv:null,target:0};
+function toggleCU(){
+  if(cu.on){clearInterval(cu.iv);cu.elapsed+=Date.now()-cu.start;cu.on=false;document.getElementById('cuBtn').textContent='Resume'}
+  else{cu.on=true;cu.start=Date.now();document.getElementById('cuBtn').textContent='Pause';cu.iv=setInterval(updCU,200)}
+}
+function updCU(){
+  const e=cu.elapsed+(cu.on?Date.now()-cu.start:0);
+  const h=Math.floor(e/36e5),m=Math.floor((e%36e5)/6e4),s=Math.floor((e%6e4)/1e3);
+  document.getElementById('cuDisplay').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if(cu.target>0){
+    const pct=Math.min(100,(e/(cu.target*60000))*100);
+    document.getElementById('cuProgressFill').style.width=pct+'%';
+    if(pct>=100&&pct<101){document.getElementById('cuTargetLabel').innerHTML='<span style="color:var(--accent4)">Target reached!</span>';sfx(880,0.3);confetti()}
+  }
+}
+function resetCU(){
+  const e=cu.elapsed+(cu.on?Date.now()-cu.start:0);
+  clearInterval(cu.iv);cu.on=false;cu.elapsed=0;
+  document.getElementById('cuBtn').textContent='Start';
+  document.getElementById('cuDisplay').textContent='00:00:00';
+  document.getElementById('cuProgressFill').style.width='0%';
+  updCUTarget();
+  if(e>60000){const mins=Math.round(e/60000);D.studyMinutes+=mins;const t=today();D.dailyMinutes[t]=(D.dailyMinutes[t]||0)+mins;addXP(mins);recAct();updGoals('minutes',mins);sv()}
+}
+function saveCUSession(){
+  const e=cu.elapsed+(cu.on?Date.now()-cu.start:0);
+  if(e<1000){toast('Start the timer first!');return}
+  const mins=Math.round(e/60000*10)/10;
+  if(!D.cuSessions)D.cuSessions=[];
+  D.cuSessions.unshift({date:today(),time:new Date().toLocaleTimeString(),duration:e,mins,target:cu.target});
+  D.studyMinutes+=Math.round(mins);
+  const t=today();D.dailyMinutes[t]=(D.dailyMinutes[t]||0)+Math.round(mins);
+  addXP(Math.round(mins));recAct();updGoals('minutes',Math.round(mins));sv();
+  clearInterval(cu.iv);cu.on=false;cu.elapsed=0;
+  document.getElementById('cuBtn').textContent='Start';
+  document.getElementById('cuDisplay').textContent='00:00:00';
+  document.getElementById('cuProgressFill').style.width='0%';
+  updCUTarget();
+  renCUSessions();
+  toast(`Session saved! ${mins} minutes logged.`);
+}
+function updCUTarget(){
+  cu.target=parseInt(document.getElementById('cuTarget').value)||0;
+  const bar=document.getElementById('cuProgressBar');
+  const label=document.getElementById('cuTargetLabel');
+  if(cu.target>0){
+    bar.style.display='';
+    const h=Math.floor(cu.target/60),m=cu.target%60;
+    label.textContent=`Target: ${h>0?h+'h ':''}${m}m`;
+  } else {
+    bar.style.display='none';
+    label.textContent='No target set — open-ended session';
+  }
+}
+function renCUSessions(){
+  const el=document.getElementById('cuSessions');
+  if(!D.cuSessions||!D.cuSessions.length){el.textContent='No sessions yet.';return}
+  el.innerHTML=D.cuSessions.slice(0,10).map(s=>{
+    const h=Math.floor(s.duration/36e5),m=Math.floor((s.duration%36e5)/6e4),sec=Math.floor((s.duration%6e4)/1e3);
+    const dur=`${h>0?h+'h ':''}${m}m ${sec}s`;
+    return `<div class="cu-sess"><span>${s.date} at ${s.time}</span><span style="font-weight:600;color:var(--accent4)">${dur}${s.target?' / '+s.target+'m target':''}</span></div>`;
+  }).join('');
+}
 
 // ===== FLASHCARDS =====
 let cDk=null,cCI=0,rQ=[];
@@ -1050,12 +1249,13 @@ function renStats(){
 const themes=[{id:'midnight',color:'#0b0b1a'},{id:'cyberpunk',color:'#1a0020'},{id:'ocean',color:'#0c1929'},{id:'forest',color:'#0d1a0d'},{id:'sunset',color:'#1a0d13'},{id:'light',color:'#f5f5f9'},{id:'pastel-pink',color:'#fff0f3'},{id:'pastel-lavender',color:'#f3f0ff'},{id:'pastel-mint',color:'#ecfdf5'},{id:'pastel-sky',color:'#eff6ff'},{id:'pastel-peach',color:'#fff7ed'}];
 function renSett(){
   document.getElementById('themeGrid').innerHTML=themes.map(t=>`<div class="theme-swatch ${D.settings.theme===t.id?'active':''}" style="background:${t.color}" onclick="setTheme('${t.id}')" title="${t.id}"></div>`).join('');
-  document.getElementById('sFocus').value=D.settings.focus||25;document.getElementById('sShort').value=D.settings.short||5;document.getElementById('sLong').value=D.settings.long||15;document.getElementById('sSfx').value=D.settings.sfx||'on';updAutoBtn()}
+  document.getElementById('sFocus').value=D.settings.focus||25;document.getElementById('sShort').value=D.settings.short||5;document.getElementById('sLong').value=D.settings.long||15;document.getElementById('sSfx').value=D.settings.sfx||'on';updAutoBtn();
+  const uName=authUser||'Guest';document.getElementById('settUserName').textContent=uName;document.getElementById('settUserAv').textContent=uName[0].toUpperCase()}
 function setTheme(t){D.settings.theme=t;document.documentElement.setAttribute('data-theme',t);sv();renSett()}
 function saveSett(){D.settings.focus=parseInt(document.getElementById('sFocus').value)||25;D.settings.short=parseInt(document.getElementById('sShort').value)||5;D.settings.long=parseInt(document.getElementById('sLong').value)||15;D.settings.sfx=document.getElementById('sSfx').value;sv();resetPomo()}
 function exportData(){dlFile('studybeast-backup.json',JSON.stringify(D,null,2),'application/json')}
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{D=JSON.parse(ev.target.result);sv();location.reload()}catch(e){toast('Invalid file!')}};r.readAsText(f)}
-function resetAll(){if(!confirm('Delete ALL data? This cannot be undone!'))return;localStorage.removeItem(DB);location.reload()}
+function resetAll(){if(!confirm('Delete ALL data? This cannot be undone!'))return;localStorage.removeItem(getDBKey());location.reload()}
 
 // ===== SEARCH =====
 function openSearch(){document.getElementById('searchOverlay').classList.add('open');document.getElementById('searchInput').value='';document.getElementById('searchResults').innerHTML='';setTimeout(()=>document.getElementById('searchInput').focus(),100)}
@@ -1103,7 +1303,7 @@ document.addEventListener('keydown',e=>{
   if(e.ctrlKey&&e.key==='k'){e.preventDefault();openSearch()}
   if(e.ctrlKey&&e.key==='f'&&!e.shiftKey){e.preventDefault();enterFocus()}
   if(e.key==='Escape'){exitFocus();closeSearch();document.querySelectorAll('.mo.open').forEach(m=>m.classList.remove('open'))}
-  const panels=['dash','pomo','sw','fc','notes','quiz','tasks','habits','goals','journal'];
+  const panels=['dash','pomo','sw','cu','fc','notes','quiz','tasks','habits','goals','journal'];
   if(e.key>='1'&&e.key<='9')go(panels[parseInt(e.key)-1]||'dash');
   if(e.key==='0')go('ambient');
   if(e.key===' '&&document.getElementById('p-pomo').classList.contains('active')){e.preventDefault();togglePomo()}
@@ -1112,8 +1312,13 @@ document.addEventListener('keydown',e=>{
 document.querySelectorAll('.mo').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')})});
 
 // ===== INIT =====
+function initApp(){
+  D=ld();
+  document.documentElement.setAttribute('data-theme',D.settings.theme||'midnight');
+  updDash();updPD();renDk();renN();renT();renPLog();renHab();renGoals();renAmb();renJournal();updAutoBtn();updCUTarget();renCUSessions();
+}
 document.documentElement.setAttribute('data-theme',D.settings.theme||'midnight');
-updDash();updPD();renDk();renN();renT();renPLog();renHab();renGoals();renAmb();renJournal();updAutoBtn();
+if(authUser){initApp()}
 </script>
 </body>
 </html>
