@@ -284,6 +284,41 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 .theme-swatch.active{border-color:#fff;transform:scale(1.1)}
 
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+
+/* Study Pet */
+.pet-container{text-align:center;padding:20px 0}
+.pet-scene{position:relative;width:200px;height:200px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
+.pet-sprite{font-size:6rem;transition:transform 0.3s;cursor:pointer;user-select:none;filter:drop-shadow(0 4px 20px rgba(124,58,237,0.3))}
+.pet-sprite:hover{transform:scale(1.1)}
+.pet-sprite.bounce{animation:petBounce 0.6s ease}
+.pet-sprite.happy{animation:petHappy 1s ease infinite}
+.pet-sprite.sleepy{animation:petSleepy 3s ease-in-out infinite}
+.pet-sprite.hungry{animation:petHungry 1.5s ease-in-out infinite}
+@keyframes petBounce{0%,100%{transform:translateY(0)}30%{transform:translateY(-20px)}50%{transform:translateY(-10px)}70%{transform:translateY(-15px)}}
+@keyframes petHappy{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-6px) rotate(-3deg)}75%{transform:translateY(-6px) rotate(3deg)}}
+@keyframes petSleepy{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(3px) scale(0.97)}}
+@keyframes petHungry{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+.pet-name{font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,var(--accent1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.pet-stage{font-size:0.78rem;color:var(--muted);margin-bottom:8px}
+.pet-mood-bar{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:10px}
+.pet-mood-icon{font-size:1.2rem}
+.pet-mood-track{width:120px;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden}
+.pet-mood-fill{height:100%;border-radius:4px;transition:width 0.6s,background 0.6s}
+.pet-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.pet-stat{text-align:center;font-size:0.75rem;color:var(--muted)}
+.pet-stat-val{font-size:1.1rem;font-weight:700;color:var(--text)}
+.pet-actions{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.pet-feed-btn{position:relative;overflow:hidden}
+.pet-feed-btn.cooldown{opacity:0.5;pointer-events:none}
+.pet-bubble{position:absolute;top:-30px;left:50%;transform:translateX(-50%);background:#1e1e2e;border:1px solid var(--border);padding:4px 12px;border-radius:10px;font-size:0.75rem;white-space:nowrap;animation:fadeUp 0.3s ease;pointer-events:none;z-index:5}
+.pet-evo-flash{animation:evoFlash 1.5s ease-out}
+@keyframes evoFlash{0%{filter:brightness(1) drop-shadow(0 0 0 transparent)}30%{filter:brightness(2) drop-shadow(0 0 40px var(--accent1))}60%{filter:brightness(1.5) drop-shadow(0 0 20px var(--accent2))}100%{filter:brightness(1) drop-shadow(0 4px 20px rgba(124,58,237,0.3))}}
+.pet-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pet-particle{position:absolute;border-radius:50%;animation:petParticleFloat 2s ease-out forwards;pointer-events:none}
+@keyframes petParticleFloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(0.3)}}
+.pet-xp-bar{width:160px;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin:6px auto 0}
+.pet-xp-fill{height:100%;background:linear-gradient(90deg,var(--accent4),var(--accent2));border-radius:3px;transition:width 0.6s}
+.pet-xp-label{font-size:0.68rem;color:var(--muted);margin-top:2px}
 /* Mobile bottom nav */
 .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--sidebar);backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:10;padding:6px 0 env(safe-area-inset-bottom,6px);overflow-x:auto}
 .bottom-nav-inner{display:flex;justify-content:space-around;min-width:100%}
@@ -454,6 +489,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <button class="nav-btn" data-p="journal" onclick="go('journal')"><span>&#9997;</span><span class="tt">Journal</span></button>
 <button class="nav-btn" data-p="ambient" onclick="go('ambient')"><span>&#9836;</span><span class="tt">Ambient</span></button>
 <button class="nav-btn" data-p="wb" onclick="go('wb')"><span>&#9999;</span><span class="tt">Whiteboard</span></button>
+<button class="nav-btn" data-p="pet" onclick="go('pet')"><span>&#128062;</span><span class="tt">Study Pet</span></button>
 <button class="nav-btn" data-p="room" onclick="go('room')"><span>&#128101;</span><span class="tt">Study Room</span></button>
 <div class="sdiv"></div>
 <button class="nav-btn" data-p="stats" onclick="go('stats')"><span>&#9670;</span><span class="tt">Stats</span></button>
@@ -492,6 +528,17 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="sc"><div class="sn" id="s2">0</div><div class="sl">Pomodoros</div></div>
 <div class="sc"><div class="sn" id="s3">0%</div><div class="sl">Quiz Accuracy</div></div>
 <div class="sc"><div class="sn" id="s4">0h</div><div class="sl">Study Time</div></div>
+</div>
+<div class="glass" style="margin-bottom:14px;cursor:pointer" onclick="go('pet')">
+<div style="display:flex;align-items:center;gap:16px">
+<div id="dashPetSprite" style="font-size:3rem;filter:drop-shadow(0 2px 10px rgba(124,58,237,0.3))">&#129442;</div>
+<div style="flex:1">
+<div style="font-weight:700;font-size:0.95rem" id="dashPetName">Your Beast</div>
+<div style="font-size:0.78rem;color:var(--muted)" id="dashPetStatus">Tap to visit your pet!</div>
+<div style="margin-top:6px;width:100px;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden"><div id="dashPetMood" style="height:100%;border-radius:3px;background:var(--accent4);width:50%;transition:width 0.6s"></div></div>
+</div>
+<div style="font-size:0.75rem;color:var(--accent1);font-weight:600" id="dashPetStage">Stage 1</div>
+</div>
 </div>
 <div class="g2">
 <div class="glass"><h3 style="font-size:0.92rem;margin-bottom:8px">Activity (12 weeks)</h3><div class="act-grid" id="actGrid"></div></div>
@@ -663,6 +710,47 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="glass"><h3 style="font-size:0.92rem;margin-bottom:10px">Achievements</h3><div id="achList" style="display:flex;flex-wrap:wrap;gap:7px"></div></div>
 </div></div>
 
+<!-- STUDY PET -->
+<div class="panel" id="p-pet">
+<div class="header"><h2>Study Pet</h2></div>
+<div class="g2">
+<div class="glass">
+<div class="pet-container">
+<div class="pet-scene">
+<div class="pet-particles" id="petParticles"></div>
+<div class="pet-sprite" id="petSprite" onclick="petPat()">&#129442;</div>
+</div>
+<div class="pet-name" id="petName">Your Beast</div>
+<div class="pet-stage" id="petStage">Egg &middot; Stage 1/5</div>
+<div class="pet-mood-bar"><span class="pet-mood-icon" id="petMoodIcon">&#128522;</span><div class="pet-mood-track"><div class="pet-mood-fill" id="petMoodFill" style="width:50%;background:var(--accent4)"></div></div><span style="font-size:0.75rem;color:var(--muted)" id="petMoodText">Happy</span></div>
+<div class="pet-xp-bar"><div class="pet-xp-fill" id="petXPFill" style="width:0%"></div></div>
+<div class="pet-xp-label" id="petXPLabel">0 / 100 Pet XP to next stage</div>
+<div class="pet-stats">
+<div class="pet-stat"><div class="pet-stat-val" id="petAge">0</div>Days Old</div>
+<div class="pet-stat"><div class="pet-stat-val" id="petFeeds">0</div>Times Fed</div>
+<div class="pet-stat"><div class="pet-stat-val" id="petPats">0</div>Pats</div>
+</div>
+<div class="pet-actions">
+<button class="btn btn-p pet-feed-btn" id="petFeedBtn" onclick="petFeed()">&#127860; Feed (Daily Challenge)</button>
+<button class="btn btn-g" onclick="petPat()">&#128075; Pat</button>
+</div>
+</div>
+</div>
+<div class="glass">
+<h3 style="font-size:0.92rem;margin-bottom:12px">About Your Beast</h3>
+<div id="petInfo" style="font-size:0.88rem;color:var(--muted);line-height:1.8"></div>
+<div style="margin-top:16px">
+<h3 style="font-size:0.92rem;margin-bottom:8px">Rename Your Pet</h3>
+<div style="display:flex;gap:8px"><input type="text" id="petNameInput" placeholder="Enter a name..." maxlength="20"><button class="btn btn-p btn-s" onclick="renamePet()">Save</button></div>
+</div>
+<div style="margin-top:16px">
+<h3 style="font-size:0.92rem;margin-bottom:8px">Evolution Stages</h3>
+<div id="petEvoTimeline" style="font-size:0.82rem;line-height:2.2"></div>
+</div>
+</div>
+</div>
+</div>
+
 <!-- STUDY ROOM -->
 <div class="panel" id="p-room">
 <div class="header"><h2>Study Room</h2></div>
@@ -806,7 +894,7 @@ function getUserDB(){return authUser?'sb3_'+authUser:'sb3'}
 // ===== DATA =====
 function getDBKey(){return authUser?'sb3_'+authUser:'sb3'}
 let D=ld();
-function ld(){const DB=getDBKey();try{const r=localStorage.getItem(DB);if(r){const d=JSON.parse(r);['habits','goals','dailyCards','dailyMinutes','journal','settings','cuSessions'].forEach(k=>{if(!d[k])d[k]=k==='settings'?{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false}:k==='journal'||k==='cuSessions'?[]:{}});if(!d.settings.autoStart)d.settings.autoStart=false;return d;}}catch(e){}return{xp:0,level:1,streak:0,lastStudy:null,cardsReviewed:0,pomosCompleted:0,quizCorrect:0,quizTotal:0,studyMinutes:0,activity:{},decks:[],notes:[],tasks:[],pomoLog:[],habits:[],goals:[],dailyCards:{},dailyMinutes:{},journal:[],cuSessions:[],settings:{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false}}}
+function ld(){const DB=getDBKey();try{const r=localStorage.getItem(DB);if(r){const d=JSON.parse(r);['habits','goals','dailyCards','dailyMinutes','journal','settings','cuSessions','pet'].forEach(k=>{if(!d[k])d[k]=k==='settings'?{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false}:k==='journal'||k==='cuSessions'?[]:k==='pet'?{name:'Study Beast',xp:0,pats:0,feeds:0,lastFed:null,created:new Date().toISOString().split('T')[0],mood:50}:{}});if(!d.settings.autoStart)d.settings.autoStart=false;return d;}}catch(e){}return{xp:0,level:1,streak:0,lastStudy:null,cardsReviewed:0,pomosCompleted:0,quizCorrect:0,quizTotal:0,studyMinutes:0,activity:{},decks:[],notes:[],tasks:[],pomoLog:[],habits:[],goals:[],dailyCards:{},dailyMinutes:{},journal:[],cuSessions:[],settings:{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false}}}
 function sv(){localStorage.setItem(getDBKey(),JSON.stringify(D))}
 function today(){return new Date().toISOString().split('T')[0]}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
@@ -854,6 +942,7 @@ function go(n){
   if(n==='stats')renStats();if(n==='wb')initWB();if(n==='journal')renJournal();
   if(n==='ambient')renAmb();if(n==='room')renRoomMembers();if(n==='settings')renSett();
   if(n==='cu'){updCUTarget();renCUSessions()}
+  if(n==='pet')renPet()
 }
 function openM(id){document.getElementById(id).classList.add('open')}
 function closeM(id){document.getElementById(id).classList.remove('open')}
@@ -879,7 +968,7 @@ function reqNotif(){Notification.requestPermission().then(p=>{toast(p==='granted
 
 // ===== DASHBOARD =====
 function updDash(){
-  updHead();showChallenge();showQ(document.getElementById('dashQ'));renToday();
+  updHead();showChallenge();showQ(document.getElementById('dashQ'));renToday();renPet();
   if(D.streak>=3)document.getElementById('streakB').classList.add('hot');else document.getElementById('streakB').classList.remove('hot');
   document.getElementById('s1').textContent=D.cardsReviewed;
   document.getElementById('s2').textContent=D.pomosCompleted;
@@ -1252,7 +1341,8 @@ function getMyStatus(){
   const pEl=document.getElementById('pTime');
   let status='Idle', timer='';
   if(pEl&&pEl.textContent!=='00:00'){status='Studying';timer=pEl.textContent}
-  return{name:getMyName(),color:getMyColor(),status,timer,level:D.level,streak:D.streak,xp:D.xp,ts:Date.now()}
+  const pet=getPet();const petStage=PET_STAGES[getPetStage()];
+  return{name:getMyName(),color:getMyColor(),status,timer,level:D.level,streak:D.streak,xp:D.xp,ts:Date.now(),petName:pet.name,petSprite:petStage.sprite,petStage:petStage.name}
 }
 
 function connectWS(){
@@ -1368,7 +1458,7 @@ function renRoomMembers(){
       <div class="rm-av" style="background:${m.color||'var(--accent1)'}">${initial}</div>
       <div class="rm-info">
         <div class="rm-name">${esc(m.name||'?')}${m.isHost?' &#128081;':''}${isMe?' (You)':''}</div>
-        <div class="rm-status">${esc(m.status||'Idle')} &middot; Lv ${m.level||1} &middot; ${m.streak||0} day streak</div>
+        <div class="rm-status">${esc(m.status||'Idle')} &middot; Lv ${m.level||1} &middot; ${m.streak||0} day streak${m.petName?` &middot; ${m.petSprite||''} ${esc(m.petName)}`:''}</div>
       </div>
       ${m.timer?`<div class="rm-timer">${esc(m.timer)}</div>`:''}
       <div class="rm-pulse"></div>
@@ -1417,7 +1507,7 @@ function renStats(){
   const mkChart=(elId,getData,color)=>{const el=document.getElementById(elId);let mx=1;const dd=[];for(let i=6;i>=0;i--){const d=new Date(Date.now()-i*864e5);const k=d.toISOString().split('T')[0];const v=getData(k);dd.push({l:days[d.getDay()],v});if(v>mx)mx=v}el.innerHTML=dd.map(d=>`<div class="bar-col"><div class="bar" style="height:${Math.max(2,d.v/mx*140)}px;${color||''}" title="${d.v}"></div><div class="bar-l">${d.l}</div></div>`).join('')};
   mkChart('chW',k=>D.dailyMinutes[k]||0);mkChart('chC',k=>D.dailyCards[k]||0,'background:linear-gradient(180deg,var(--accent2),var(--accent4))');
   document.getElementById('allStats').innerHTML=`<div>Cards: <strong>${D.cardsReviewed}</strong></div><div>Pomodoros: <strong>${D.pomosCompleted}</strong></div><div>Study Time: <strong>${Math.floor(D.studyMinutes/60)}h ${D.studyMinutes%60}m</strong></div><div>Quiz: <strong>${D.quizTotal>0?Math.round(D.quizCorrect/D.quizTotal*100):0}%</strong> (${D.quizCorrect}/${D.quizTotal})</div><div>Streak: <strong>${D.streak} days</strong></div><div>Level: <strong>${D.level}</strong></div><div>Decks: <strong>${D.decks.length}</strong> (${D.decks.reduce((a,d)=>a+d.cards.length,0)} cards)</div><div>Notes: <strong>${D.notes.length}</strong></div><div>Journal Entries: <strong>${D.journal.length}</strong></div>`;
-  const achs=[{n:'First Step',d:'Review 1 card',ok:D.cardsReviewed>=1},{n:'Card Shark',d:'50 cards',ok:D.cardsReviewed>=50},{n:'Card Master',d:'500 cards',ok:D.cardsReviewed>=500},{n:'Focused',d:'1 pomo',ok:D.pomosCompleted>=1},{n:'Deep Work',d:'10 pomos',ok:D.pomosCompleted>=10},{n:'Marathon',d:'50 pomos',ok:D.pomosCompleted>=50},{n:'Week Warrior',d:'7 day streak',ok:D.streak>=7},{n:'Month Master',d:'30 day streak',ok:D.streak>=30},{n:'Lv 5',d:'Level 5',ok:D.level>=5},{n:'Lv 10',d:'Level 10',ok:D.level>=10},{n:'Lv 25',d:'Level 25',ok:D.level>=25},{n:'Scholar',d:'10 notes',ok:D.notes.length>=10},{n:'Deck Builder',d:'5 decks',ok:D.decks.length>=5},{n:'Study Hour',d:'60 min',ok:D.studyMinutes>=60},{n:'10 Hours',d:'600 min',ok:D.studyMinutes>=600},{n:'Journalist',d:'10 journal entries',ok:D.journal.length>=10},{n:'Quiz Whiz',d:'80%+ accuracy',ok:D.quizTotal>0&&D.quizCorrect/D.quizTotal>=0.8}];
+  const achs=[{n:'First Step',d:'Review 1 card',ok:D.cardsReviewed>=1},{n:'Card Shark',d:'50 cards',ok:D.cardsReviewed>=50},{n:'Card Master',d:'500 cards',ok:D.cardsReviewed>=500},{n:'Focused',d:'1 pomo',ok:D.pomosCompleted>=1},{n:'Deep Work',d:'10 pomos',ok:D.pomosCompleted>=10},{n:'Marathon',d:'50 pomos',ok:D.pomosCompleted>=50},{n:'Week Warrior',d:'7 day streak',ok:D.streak>=7},{n:'Month Master',d:'30 day streak',ok:D.streak>=30},{n:'Lv 5',d:'Level 5',ok:D.level>=5},{n:'Lv 10',d:'Level 10',ok:D.level>=10},{n:'Lv 25',d:'Level 25',ok:D.level>=25},{n:'Scholar',d:'10 notes',ok:D.notes.length>=10},{n:'Deck Builder',d:'5 decks',ok:D.decks.length>=5},{n:'Study Hour',d:'60 min',ok:D.studyMinutes>=60},{n:'10 Hours',d:'600 min',ok:D.studyMinutes>=600},{n:'Journalist',d:'10 journal entries',ok:D.journal.length>=10},{n:'Quiz Whiz',d:'80%+ accuracy',ok:D.quizTotal>0&&D.quizCorrect/D.quizTotal>=0.8},{n:'Pet Hatcher',d:'Hatch your egg',ok:D.pet&&D.pet.xp>=100},{n:'Beast Tamer',d:'Reach Adult Beast',ok:D.pet&&D.pet.xp>=800},{n:'Legendary Tamer',d:'Reach Legendary Beast',ok:D.pet&&D.pet.xp>=1500},{n:'Pet Lover',d:'100 pats',ok:D.pet&&D.pet.pats>=100}];
   document.getElementById('achList').innerHTML=achs.map(a=>`<div style="padding:8px 12px;border-radius:9px;background:${a.ok?'rgba(16,185,129,0.12)':'rgba(255,255,255,0.03)'};border:1px solid ${a.ok?'var(--accent4)':'var(--border)'};font-size:0.8rem;${a.ok?'':'opacity:0.35'}" title="${a.d}">${a.ok?'&#9733;':'&#9734;'} ${a.n}</div>`).join('')}
 
 // ===== SETTINGS =====
@@ -1478,7 +1568,7 @@ document.addEventListener('keydown',e=>{
   if(e.ctrlKey&&e.key==='k'){e.preventDefault();openSearch()}
   if(e.ctrlKey&&e.key==='f'&&!e.shiftKey){e.preventDefault();enterFocus()}
   if(e.key==='Escape'){exitFocus();closeSearch();document.querySelectorAll('.mo.open').forEach(m=>m.classList.remove('open'))}
-  const panels=['dash','pomo','sw','cu','fc','notes','quiz','tasks','habits','goals','journal'];
+  const panels=['dash','pomo','sw','cu','fc','notes','quiz','tasks','habits','goals','journal','pet'];
   if(e.key>='1'&&e.key<='9')go(panels[parseInt(e.key)-1]||'dash');
   if(e.key==='0')go('ambient');
   if(e.key===' '&&document.getElementById('p-pomo').classList.contains('active')){e.preventDefault();togglePomo()}
@@ -1502,10 +1592,206 @@ function updFLReturnBtn(){
   } else if(rb){rb.style.display='none'}
 }
 
+// ===== STUDY PET =====
+const PET_STAGES=[
+  {name:'Egg',sprite:'&#129442;',minXP:0,desc:'A mysterious egg. Keep studying to hatch it!'},
+  {name:'Baby Beast',sprite:'&#128048;',minXP:100,desc:'Your beast hatched! It\'s tiny but full of energy. Keep feeding it knowledge!'},
+  {name:'Teen Beast',sprite:'&#128049;',minXP:350,desc:'Your beast is growing fast! It\'s becoming more confident and loves watching you study.'},
+  {name:'Adult Beast',sprite:'&#129409;',minXP:800,desc:'A powerful study companion! Your beast roars with pride at your dedication.'},
+  {name:'Legendary Beast',sprite:'&#128009;',minXP:1500,desc:'A LEGENDARY beast! Few students ever raise one this powerful. You are a true scholar.'}
+];
+const PET_MOODS=[
+  {name:'Ecstatic',icon:'&#128525;',min:80,color:'var(--accent4)'},
+  {name:'Happy',icon:'&#128522;',min:60,color:'var(--accent2)'},
+  {name:'Content',icon:'&#128578;',min:40,color:'var(--accent5)'},
+  {name:'Hungry',icon:'&#128533;',min:20,color:'var(--accent3)'},
+  {name:'Sleepy',icon:'&#128564;',min:0,color:'var(--muted)'}
+];
+function getPet(){
+  if(!D.pet) D.pet={name:'Study Beast',xp:0,pats:0,feeds:0,lastFed:null,created:today(),mood:50};
+  return D.pet;
+}
+function getPetStage(){
+  const pet=getPet();
+  let stage=0;
+  for(let i=PET_STAGES.length-1;i>=0;i--){if(pet.xp>=PET_STAGES[i].minXP){stage=i;break}}
+  return stage;
+}
+function getPetMood(){
+  const pet=getPet();
+  for(const m of PET_MOODS){if(pet.mood>=m.min)return m}
+  return PET_MOODS[PET_MOODS.length-1];
+}
+function calcPetMood(){
+  const pet=getPet();
+  let mood=30; // base
+  // Studied today?
+  if(D.activity[today()])mood+=20;
+  // Streak bonus
+  if(D.streak>=1)mood+=5;
+  if(D.streak>=3)mood+=5;
+  if(D.streak>=7)mood+=10;
+  // Fed today?
+  if(pet.lastFed===today())mood+=15;
+  // Cards today?
+  if((D.dailyCards[today()]||0)>=5)mood+=5;
+  // Pomos today?
+  if(D.pomoLog.filter(l=>l.date===today()).length>=1)mood+=5;
+  // Pats bonus (small)
+  if(pet.pats>0)mood+=Math.min(5,Math.floor(pet.pats/10));
+  // Not studied in 2+ days penalty
+  if(D.lastStudy){
+    const daysSince=Math.floor((Date.now()-new Date(D.lastStudy).getTime())/864e5);
+    if(daysSince>=2)mood-=daysSince*10;
+  }
+  pet.mood=Math.max(0,Math.min(100,mood));
+  sv();
+  return pet.mood;
+}
+function addPetXP(n){
+  const pet=getPet();
+  const oldStage=getPetStage();
+  pet.xp+=n;
+  const newStage=getPetStage();
+  if(newStage>oldStage){
+    toast(`Your pet evolved into ${PET_STAGES[newStage].name}!`);
+    confetti();
+    sfx(880,0.4);
+    const el=document.getElementById('petSprite');
+    if(el){el.classList.add('pet-evo-flash');setTimeout(()=>el.classList.remove('pet-evo-flash'),1500)}
+  }
+  sv();
+}
+function petFeed(){
+  const pet=getPet();
+  if(pet.lastFed===today()){toast('Already fed today! Complete a daily challenge tomorrow.');return}
+  // Check if daily challenge is complete
+  const seed=new Date().getDate()%challenges.length;
+  const c=challenges[seed];
+  if(!c.check()){toast('Complete today\'s Daily Challenge first to feed your pet!');return}
+  pet.lastFed=today();
+  pet.feeds++;
+  addPetXP(15);
+  calcPetMood();
+  toast('Your pet is well fed! +15 Pet XP');
+  sfx(660,0.2);
+  spawnPetParticles();
+  renPet();
+}
+function petPat(){
+  const pet=getPet();
+  pet.pats++;
+  sv();
+  const el=document.getElementById('petSprite');
+  if(el){el.classList.remove('bounce');void el.offsetWidth;el.classList.add('bounce')}
+  // Show a random bubble
+  const bubbles=['&#10084;','Rawr!','Study time!','&#127775;','Yay!','&#128171;','More cards!','&#128640;'];
+  showPetBubble(bubbles[Math.floor(Math.random()*bubbles.length)]);
+  if(pet.pats%10===0){addPetXP(2);toast('+2 Pet XP for pats!')}
+  renPet();
+}
+function showPetBubble(text){
+  const scene=document.querySelector('.pet-scene');
+  if(!scene)return;
+  const b=document.createElement('div');b.className='pet-bubble';b.innerHTML=text;
+  scene.appendChild(b);setTimeout(()=>b.remove(),1500);
+}
+function spawnPetParticles(){
+  const el=document.getElementById('petParticles');
+  if(!el)return;
+  const colors=['var(--accent1)','var(--accent2)','var(--accent4)','var(--accent5)'];
+  for(let i=0;i<8;i++){
+    const p=document.createElement('div');p.className='pet-particle';
+    p.style.cssText=`left:${30+Math.random()*40}%;bottom:30%;width:${4+Math.random()*6}px;height:${4+Math.random()*6}px;background:${colors[i%colors.length]};animation-delay:${Math.random()*0.5}s`;
+    el.appendChild(p);setTimeout(()=>p.remove(),2500);
+  }
+}
+function renamePet(){
+  const name=document.getElementById('petNameInput').value.trim();
+  if(!name){toast('Enter a name!');return}
+  const pet=getPet();
+  pet.name=name;
+  sv();
+  toast('Pet renamed to '+name+'!');
+  renPet();
+}
+function renPet(){
+  const pet=getPet();
+  const stage=getPetStage();
+  const stageData=PET_STAGES[stage];
+  const mood=calcPetMood();
+  const moodData=getPetMood();
+  const nextStage=PET_STAGES[stage+1];
+  const xpForNext=nextStage?nextStage.minXP:stageData.minXP;
+  const xpInStage=pet.xp-stageData.minXP;
+  const xpNeeded=nextStage?(nextStage.minXP-stageData.minXP):1;
+  const xpPct=nextStage?Math.min(100,Math.round(xpInStage/xpNeeded*100)):100;
+
+  // Pet page elements
+  const sprite=document.getElementById('petSprite');
+  if(sprite){
+    sprite.innerHTML=stageData.sprite;
+    sprite.className='pet-sprite';
+    if(mood>=80)sprite.classList.add('happy');
+    else if(mood<20)sprite.classList.add('hungry');
+    else if(mood<40)sprite.classList.add('sleepy');
+  }
+  const nameEl=document.getElementById('petName');if(nameEl)nameEl.textContent=pet.name;
+  const stageEl=document.getElementById('petStage');if(stageEl)stageEl.textContent=`${stageData.name} \u00B7 Stage ${stage+1}/5`;
+  const moodIcon=document.getElementById('petMoodIcon');if(moodIcon)moodIcon.innerHTML=moodData.icon;
+  const moodFill=document.getElementById('petMoodFill');if(moodFill){moodFill.style.width=mood+'%';moodFill.style.background=moodData.color}
+  const moodText=document.getElementById('petMoodText');if(moodText)moodText.textContent=moodData.name;
+  const xpFill=document.getElementById('petXPFill');if(xpFill)xpFill.style.width=xpPct+'%';
+  const xpLabel=document.getElementById('petXPLabel');if(xpLabel)xpLabel.textContent=nextStage?`${xpInStage} / ${xpNeeded} Pet XP to ${nextStage.name}`:'MAX STAGE - Legendary!';
+  const ageEl=document.getElementById('petAge');if(ageEl){const created=new Date(pet.created);const days=Math.max(0,Math.floor((Date.now()-created.getTime())/864e5));ageEl.textContent=days}
+  const feedsEl=document.getElementById('petFeeds');if(feedsEl)feedsEl.textContent=pet.feeds;
+  const patsEl=document.getElementById('petPats');if(patsEl)patsEl.textContent=pet.pats;
+
+  // Feed button state
+  const feedBtn=document.getElementById('petFeedBtn');
+  if(feedBtn){
+    if(pet.lastFed===today()){feedBtn.classList.add('cooldown');feedBtn.innerHTML='&#10003; Fed Today'}
+    else{feedBtn.classList.remove('cooldown');feedBtn.innerHTML='&#127860; Feed (Daily Challenge)'}
+  }
+
+  // Info panel
+  const info=document.getElementById('petInfo');
+  if(info)info.innerHTML=`<div style="margin-bottom:8px">${stageData.desc}</div><div><strong>Mood:</strong> ${moodData.name} (${mood}%)</div><div><strong>Total Pet XP:</strong> ${pet.xp}</div><div><strong>How to earn Pet XP:</strong></div><div style="padding-left:12px">&#8226; Study activities: +1 Pet XP per action<br>&#8226; Complete daily challenge & feed: +15 Pet XP<br>&#8226; Every 10 pats: +2 Pet XP<br>&#8226; Pomodoro session: +3 Pet XP<br>&#8226; Level up: +10 Pet XP</div>`;
+
+  // Evolution timeline
+  const timeline=document.getElementById('petEvoTimeline');
+  if(timeline)timeline.innerHTML=PET_STAGES.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;${i<=stage?'':'opacity:0.35'}">${s.sprite} <strong>${s.name}</strong> <span style="color:var(--muted)">(${s.minXP} XP)</span> ${i===stage?'<span style="color:var(--accent4);font-size:0.75rem">&#9668; Current</span>':i<stage?'<span style="color:var(--accent4)">&#10003;</span>':''}</div>`).join('');
+
+  // Dashboard mini widget
+  const dashSprite=document.getElementById('dashPetSprite');if(dashSprite)dashSprite.innerHTML=stageData.sprite;
+  const dashName=document.getElementById('dashPetName');if(dashName)dashName.textContent=pet.name;
+  const dashStatus=document.getElementById('dashPetStatus');
+  if(dashStatus){
+    const messages={Ecstatic:'Loving life! Keep it up!',Happy:'Feeling great today!',Content:'Doing okay.',Hungry:'Needs attention... study something!',Sleepy:'Zzz... hasn\'t seen you study lately.'};
+    dashStatus.textContent=moodData.name+' — '+(messages[moodData.name]||'');
+  }
+  const dashMood=document.getElementById('dashPetMood');if(dashMood){dashMood.style.width=mood+'%';dashMood.style.background=moodData.color}
+  const dashStage=document.getElementById('dashPetStage');if(dashStage)dashStage.textContent='Stage '+(stage+1);
+}
+
+// Hook pet XP into existing actions
+const _origAddXP=addXP;
+addXP=function(n){
+  const lvBefore=D.level;
+  _origAddXP(n);
+  // Give pet XP for studying
+  if(n>=25){addPetXP(3)} // pomo-sized reward
+  else if(n>=10){addPetXP(2)} // quiz/journal
+  else{addPetXP(1)} // small actions
+  // Level up bonus
+  if(D.level>lvBefore){addPetXP(10)}
+};
+
 // ===== INIT =====
 function initApp(){
   D=ld();
   document.documentElement.setAttribute('data-theme',D.settings.theme||'midnight');
+  getPet(); // ensure pet data exists
   updDash();updPD();renDk();renN();renT();renPLog();renHab();renGoals();renAmb();renJournal();updAutoBtn();updCUTarget();renCUSessions();
 }
 document.documentElement.setAttribute('data-theme',D.settings.theme||'midnight');
