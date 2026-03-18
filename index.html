@@ -291,7 +291,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 .pet-scene::before{content:'';position:absolute;inset:-8px;border-radius:50%;background:conic-gradient(from 0deg,rgba(124,58,237,0.12),rgba(6,182,212,0.08),rgba(16,185,129,0.08),rgba(245,158,11,0.08),rgba(124,58,237,0.12));animation:petAuraRotate 8s linear infinite;filter:blur(12px);z-index:0}
 .pet-scene::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(124,58,237,0.12);animation:petAuraRotate 20s linear infinite reverse}
 @keyframes petAuraRotate{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-.pet-sprite{font-size:6.5rem;transition:transform 0.3s;cursor:pointer;user-select:none;filter:drop-shadow(0 6px 24px rgba(124,58,237,0.35));position:relative;z-index:1}
+.pet-sprite{width:140px;height:140px;transition:transform 0.3s;cursor:pointer;user-select:none;filter:drop-shadow(0 6px 24px rgba(124,58,237,0.35));position:relative;z-index:1}
 .pet-sprite:hover{transform:scale(1.15) rotate(-3deg)}
 .pet-sprite.bounce{animation:petBounce 0.6s ease}
 .pet-sprite.happy{animation:petHappy 1.2s ease infinite}
@@ -740,7 +740,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <span class="pet-sparkle" style="bottom:25%;right:12%;animation-delay:0.3s">&#10024;</span>
 <span class="pet-sparkle" style="top:45%;left:5%;animation-delay:1s">&#10024;</span>
 <span class="pet-sparkle" style="top:40%;right:5%;animation-delay:1.8s">&#10024;</span>
-<div class="pet-sprite" id="petSprite" onclick="petPat()">&#129370;</div>
+<div class="pet-sprite" id="petSprite" onclick="petPat()"></div>
 </div>
 <div class="pet-name" id="petName">Your Beast</div>
 <div class="pet-stage" id="petStage">Egg &middot; Stage 1/5</div>
@@ -1370,7 +1370,7 @@ function getMyStatus(){
   let status='Idle', timer='';
   if(pEl&&pEl.textContent!=='00:00'){status='Studying';timer=pEl.textContent}
   const pet=getPet();const petStage=getStagesForPet()[getPetStage()];
-  return{name:getMyName(),color:getMyColor(),status,timer,level:D.level,streak:D.streak,xp:D.xp,ts:Date.now(),petName:pet.name,petSprite:petStage.sprite,petStage:petStage.name}
+  return{name:getMyName(),color:getMyColor(),status,timer,level:D.level,streak:D.streak,xp:D.xp,ts:Date.now(),petName:pet.name,petStage:petStage.name}
 }
 
 function connectWS(){
@@ -1486,7 +1486,7 @@ function renRoomMembers(){
       <div class="rm-av" style="background:${m.color||'var(--accent1)'}">${initial}</div>
       <div class="rm-info">
         <div class="rm-name">${esc(m.name||'?')}${m.isHost?' &#128081;':''}${isMe?' (You)':''}</div>
-        <div class="rm-status">${esc(m.status||'Idle')} &middot; Lv ${m.level||1} &middot; ${m.streak||0} day streak${m.petName?` &middot; ${m.petSprite||''} ${esc(m.petName)}`:''}</div>
+        <div class="rm-status">${esc(m.status||'Idle')} &middot; Lv ${m.level||1} &middot; ${m.streak||0} day streak${m.petName?` &middot; ${esc(m.petName)} (${esc(m.petStage||'')})`:''}</div>
       </div>
       ${m.timer?`<div class="rm-timer">${esc(m.timer)}</div>`:''}
       <div class="rm-pulse"></div>
@@ -1621,34 +1621,90 @@ function updFLReturnBtn(){
 }
 
 // ===== STUDY PET =====
+// Kawaii SVG pet sprites
+function petSVG(body,w=100,h=100){return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;max-width:${w}px">${body}</svg>`}
+const _eye='<circle fill="#fff" r="6"/><circle fill="#2d1b4e" r="4.5"/><circle fill="#fff" r="1.8" cx="-1.5" cy="-1.5"/>';
+const _blush='<ellipse fill="#ffb3c6" opacity="0.5" rx="5" ry="3"/>';
+const _kawaiiEyes=(lx,ly,rx,ry)=>`<g transform="translate(${lx},${ly})">${_eye}</g><g transform="translate(${rx},${ry})">${_eye}</g>`;
+const _kawaiiBlushed=(lx,ly,rx,ry)=>`<g transform="translate(${lx},${ly})">${_blush}</g><g transform="translate(${rx},${ry})">${_blush}</g>`;
+const PET_SPRITES={
+  dragon:[
+    // Egg - cute egg with crack and blush
+    ()=>petSVG(`<ellipse cx="50" cy="54" rx="28" ry="34" fill="#e8d5f5"/><ellipse cx="50" cy="54" rx="28" ry="34" fill="none" stroke="#c9a6e3" stroke-width="2"/><path d="M35 40 L42 48 L38 42 L46 46" fill="none" stroke="#c9a6e3" stroke-width="1.5" stroke-linecap="round"/>${_kawaiiEyes(42,52,58,52)}<path d="M47 58 Q50 61 53 58" fill="none" stroke="#2d1b4e" stroke-width="1.5" stroke-linecap="round"/>${_kawaiiBlushed(35,57,65,57)}<text x="50" y="28" text-anchor="middle" font-size="10" fill="#c9a6e3">&#10024;</text>`),
+    // Hatchling - tiny cute dragon
+    ()=>petSVG(`<ellipse cx="50" cy="58" rx="22" ry="20" fill="#b8e6b8"/><ellipse cx="50" cy="58" rx="22" ry="20" fill="none" stroke="#7bc47b" stroke-width="2"/><circle cx="50" cy="42" r="18" fill="#c5f0c5"/><circle cx="50" cy="42" r="18" fill="none" stroke="#7bc47b" stroke-width="2"/>${_kawaiiEyes(43,40,57,40)}<path d="M47 46 Q50 49 53 46" fill="none" stroke="#2d1b4e" stroke-width="1.5" stroke-linecap="round"/>${_kawaiiBlushed(35,45,65,45)}<path d="M38 28 L42 22 L44 30" fill="#7bc47b"/><path d="M56 30 L58 22 L62 28" fill="#7bc47b"/><ellipse cx="42" cy="70" rx="6" ry="4" fill="#7bc47b"/><ellipse cx="58" cy="70" rx="6" ry="4" fill="#7bc47b"/><path d="M72 58 Q80 55 76 48" fill="none" stroke="#7bc47b" stroke-width="3" stroke-linecap="round"/>`),
+    // Drake - medium dragon with wings
+    ()=>petSVG(`<path d="M25 50 Q20 35 30 30 L35 45Z" fill="#80d4a8" opacity="0.6"/><path d="M75 50 Q80 35 70 30 L65 45Z" fill="#80d4a8" opacity="0.6"/><ellipse cx="50" cy="58" rx="24" ry="22" fill="#6ecf9a"/><circle cx="50" cy="40" r="20" fill="#80e8af"/><circle cx="50" cy="40" r="20" fill="none" stroke="#4fb87a" stroke-width="2"/>${_kawaiiEyes(42,38,58,38)}<path d="M46 45 Q50 49 54 45" fill="none" stroke="#2d1b4e" stroke-width="1.8" stroke-linecap="round"/>${_kawaiiBlushed(34,43,66,43)}<path d="M36 24 L39 16 L43 26" fill="#4fb87a"/><path d="M57 26 L61 16 L64 24" fill="#4fb87a"/><path d="M50 22 L52 14 L54 23" fill="#4fb87a"/><ellipse cx="41" cy="72" rx="7" ry="5" fill="#4fb87a"/><ellipse cx="59" cy="72" rx="7" ry="5" fill="#4fb87a"/><path d="M74 56 Q84 50 80 42" fill="none" stroke="#4fb87a" stroke-width="4" stroke-linecap="round"/>`),
+    // Dragon - full dragon
+    ()=>petSVG(`<path d="M18 48 Q8 30 22 20 L30 42Z" fill="#5cc98a" opacity="0.7"/><path d="M82 48 Q92 30 78 20 L70 42Z" fill="#5cc98a" opacity="0.7"/><ellipse cx="50" cy="58" rx="26" ry="24" fill="#3dba73"/><circle cx="50" cy="38" r="22" fill="#4fd48c"/><circle cx="50" cy="38" r="22" fill="none" stroke="#2ea362" stroke-width="2"/>${_kawaiiEyes(41,36,59,36)}<path d="M45 44 Q50 49 55 44" fill="none" stroke="#2d1b4e" stroke-width="2" stroke-linecap="round"/>${_kawaiiBlushed(32,41,68,41)}<path d="M34 20 L36 10 L40 22" fill="#2ea362"/><path d="M47 18 L50 8 L53 18" fill="#2ea362"/><path d="M60 22 L64 10 L66 20" fill="#2ea362"/><path d="M30 60 Q26 66 30 72 Q34 66 30 60" fill="#ff9966" opacity="0.8"/><path d="M70 60 Q66 66 70 72 Q74 66 70 60" fill="#ff9966" opacity="0.8"/><path d="M76 55 Q90 48 86 36" fill="none" stroke="#2ea362" stroke-width="5" stroke-linecap="round"/><text x="50" y="8" text-anchor="middle" font-size="8" fill="#ffd700">&#9733;</text>`),
+    // Elder Dragon - majestic with crown
+    ()=>petSVG(`<path d="M12 45 Q0 22 18 10 L28 40Z" fill="#33a864" opacity="0.8"/><path d="M88 45 Q100 22 82 10 L72 40Z" fill="#33a864" opacity="0.8"/><ellipse cx="50" cy="58" rx="28" ry="26" fill="#28a05c"/><circle cx="50" cy="36" r="24" fill="#3cc276"/><circle cx="50" cy="36" r="24" fill="none" stroke="#1e8a4a" stroke-width="2"/>${_kawaiiEyes(40,34,60,34)}<path d="M44 43 Q50 49 56 43" fill="none" stroke="#2d1b4e" stroke-width="2" stroke-linecap="round"/>${_kawaiiBlushed(30,39,70,39)}<path d="M32 16 L34 4 L38 18" fill="#1e8a4a"/><path d="M44 12 L48 0 L52 12" fill="#1e8a4a"/><path d="M56 12 L60 0 L64 12" fill="#1e8a4a"/><path d="M62 18 L66 4 L68 16" fill="#1e8a4a"/><path d="M36 10 L42 6 L50 3 L58 6 L64 10" fill="none" stroke="#ffd700" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="3" r="3" fill="#ffd700"/><circle cx="42" cy="6" r="2" fill="#ffd700"/><circle cx="58" cy="6" r="2" fill="#ffd700"/><path d="M78 52 Q95 42 90 28" fill="none" stroke="#1e8a4a" stroke-width="6" stroke-linecap="round"/>`)
+  ],
+  cat:[
+    // Egg - cute egg with paw
+    ()=>petSVG(`<ellipse cx="50" cy="54" rx="28" ry="34" fill="#fce4ec"/><ellipse cx="50" cy="54" rx="28" ry="34" fill="none" stroke="#f8bbd0" stroke-width="2"/>${_kawaiiEyes(42,52,58,52)}<path d="M47 58 Q50 61 53 58" fill="none" stroke="#2d1b4e" stroke-width="1.5" stroke-linecap="round"/>${_kawaiiBlushed(35,57,65,57)}<circle cx="50" cy="36" r="4" fill="#f8bbd0"/><circle cx="46" cy="32" r="2.5" fill="#f8bbd0"/><circle cx="54" cy="32" r="2.5" fill="#f8bbd0"/><circle cx="50" cy="30" r="2.5" fill="#f8bbd0"/>`),
+    // Kitten - round kitten with big eyes
+    ()=>petSVG(`<ellipse cx="50" cy="60" rx="20" ry="18" fill="#ffc1d4"/><circle cx="50" cy="42" r="20" fill="#ffd6e5"/><circle cx="50" cy="42" r="20" fill="none" stroke="#f8a0be" stroke-width="2"/><path d="M33 32 L36 18 L44 34" fill="#ffd6e5" stroke="#f8a0be" stroke-width="1.5"/><path d="M56 34 L64 18 L67 32" fill="#ffd6e5" stroke="#f8a0be" stroke-width="1.5"/><path d="M36 21 L39 24 L42 32" fill="#ffb3c6"/><path d="M58 32 L61 24 L64 21" fill="#ffb3c6"/>${_kawaiiEyes(42,40,58,40)}<ellipse cx="50" cy="47" rx="2.5" ry="2" fill="#f8a0be"/><path d="M45 49 Q50 53 55 49" fill="none" stroke="#2d1b4e" stroke-width="1.2" stroke-linecap="round"/><line x1="25" y1="44" x2="36" y2="46" stroke="#f8a0be" stroke-width="1"/><line x1="25" y1="48" x2="36" y2="48" stroke="#f8a0be" stroke-width="1"/><line x1="64" y1="46" x2="75" y2="44" stroke="#f8a0be" stroke-width="1"/><line x1="64" y1="48" x2="75" y2="48" stroke="#f8a0be" stroke-width="1"/>${_kawaiiBlushed(34,48,66,48)}<path d="M50 78 Q55 75 58 78" fill="none" stroke="#f8a0be" stroke-width="2.5" stroke-linecap="round"/>`),
+    // Cat - sleek cat
+    ()=>petSVG(`<ellipse cx="50" cy="62" rx="22" ry="20" fill="#f0a0c4"/><circle cx="50" cy="40" r="22" fill="#f5b8d4"/><circle cx="50" cy="40" r="22" fill="none" stroke="#e88ab0" stroke-width="2"/><path d="M31 30 L34 14 L44 32" fill="#f5b8d4" stroke="#e88ab0" stroke-width="1.5"/><path d="M56 32 L66 14 L69 30" fill="#f5b8d4" stroke="#e88ab0" stroke-width="1.5"/><path d="M34 18 L37 22 L42 30" fill="#ffb3c6"/><path d="M58 30 L63 22 L66 18" fill="#ffb3c6"/>${_kawaiiEyes(41,38,59,38)}<ellipse cx="50" cy="45" rx="3" ry="2.2" fill="#e88ab0"/><path d="M44 48 Q50 53 56 48" fill="none" stroke="#2d1b4e" stroke-width="1.5" stroke-linecap="round"/><line x1="22" y1="42" x2="35" y2="43" stroke="#e88ab0" stroke-width="1.2"/><line x1="22" y1="46" x2="35" y2="46" stroke="#e88ab0" stroke-width="1.2"/><line x1="65" y1="43" x2="78" y2="42" stroke="#e88ab0" stroke-width="1.2"/><line x1="65" y1="46" x2="78" y2="46" stroke="#e88ab0" stroke-width="1.2"/>${_kawaiiBlushed(32,47,68,47)}<path d="M72 62 Q80 58 82 64 Q84 70 78 68" fill="none" stroke="#e88ab0" stroke-width="2.5" stroke-linecap="round"/>`),
+    // Panther - dark sleek cat
+    ()=>petSVG(`<ellipse cx="50" cy="62" rx="24" ry="22" fill="#4a3560"/><circle cx="50" cy="38" r="24" fill="#5c4478"/><circle cx="50" cy="38" r="24" fill="none" stroke="#7c5ca8" stroke-width="2"/><path d="M29 28 L32 10 L44 30" fill="#5c4478" stroke="#7c5ca8" stroke-width="1.5"/><path d="M56 30 L68 10 L71 28" fill="#5c4478" stroke="#7c5ca8" stroke-width="1.5"/><path d="M32 14 L36 20 L42 28" fill="#6b4e90"/><path d="M58 28 L64 20 L68 14" fill="#6b4e90"/><g transform="translate(40,36)"><circle fill="#fff" r="7"/><circle fill="#a78bfa" r="5"/><circle fill="#2d1b4e" r="3"/><circle fill="#fff" r="2" cx="-1.5" cy="-1.5"/></g><g transform="translate(60,36)"><circle fill="#fff" r="7"/><circle fill="#a78bfa" r="5"/><circle fill="#2d1b4e" r="3"/><circle fill="#fff" r="2" cx="-1.5" cy="-1.5"/></g><ellipse cx="50" cy="44" rx="3" ry="2.2" fill="#9b7bc4"/><path d="M44 47 Q50 52 56 47" fill="none" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/>${_kawaiiBlushed(30,44,70,44)}<path d="M74 60 Q84 54 86 62 Q88 70 80 66" fill="none" stroke="#7c5ca8" stroke-width="3" stroke-linecap="round"/><text x="50" y="16" text-anchor="middle" font-size="8" fill="#c4b5fd">&#10024;</text>`),
+    // Lion - majestic with mane
+    ()=>petSVG(`<circle cx="50" cy="40" r="36" fill="#fbbf24" opacity="0.3"/><circle cx="50" cy="40" r="30" fill="#fcd34d" opacity="0.5"/><ellipse cx="50" cy="62" rx="24" ry="22" fill="#f59e0b"/><circle cx="50" cy="40" r="24" fill="#fbbf24"/><circle cx="50" cy="40" r="24" fill="none" stroke="#d97706" stroke-width="2"/>${_kawaiiEyes(41,38,59,38)}<ellipse cx="50" cy="45" rx="3.5" ry="2.5" fill="#d97706"/><path d="M44 48 Q50 54 56 48" fill="none" stroke="#2d1b4e" stroke-width="2" stroke-linecap="round"/>${_kawaiiBlushed(30,46,70,46)}<path d="M29 26 L32 12 L42 28" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/><path d="M58 28 L68 12 L71 26" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/><path d="M32 16 L35 20 L40 26" fill="#fcd34d"/><path d="M60 26 L65 20 L68 16" fill="#fcd34d"/><path d="M74 60 Q86 52 88 62 Q90 72 80 68" fill="none" stroke="#d97706" stroke-width="3" stroke-linecap="round"/><path d="M36 10 L43 8 L50 6 L57 8 L64 10" fill="none" stroke="#ffd700" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="6" r="3" fill="#ffd700"/><circle cx="43" cy="8" r="2" fill="#ffd700"/><circle cx="57" cy="8" r="2" fill="#ffd700"/>`)
+  ],
+  bird:[
+    // Egg - speckled
+    ()=>petSVG(`<ellipse cx="50" cy="54" rx="28" ry="34" fill="#e0f2fe"/><ellipse cx="50" cy="54" rx="28" ry="34" fill="none" stroke="#93c5fd" stroke-width="2"/><circle cx="38" cy="42" r="2" fill="#93c5fd" opacity="0.5"/><circle cx="55" cy="36" r="1.5" fill="#93c5fd" opacity="0.5"/><circle cx="62" cy="50" r="2" fill="#93c5fd" opacity="0.5"/><circle cx="42" cy="62" r="1.5" fill="#93c5fd" opacity="0.5"/><circle cx="58" cy="66" r="2" fill="#93c5fd" opacity="0.5"/>${_kawaiiEyes(42,52,58,52)}<path d="M47 58 Q50 61 53 58" fill="none" stroke="#2d1b4e" stroke-width="1.5" stroke-linecap="round"/>${_kawaiiBlushed(35,57,65,57)}`),
+    // Eaglet - fluffy round baby
+    ()=>petSVG(`<ellipse cx="50" cy="62" rx="18" ry="16" fill="#bfdbfe"/><circle cx="50" cy="42" r="20" fill="#dbeafe"/><circle cx="50" cy="42" r="20" fill="none" stroke="#93c5fd" stroke-width="2"/>${_kawaiiEyes(42,40,58,40)}<path d="M47 33 L50 28 L53 33" fill="#fbbf24"/><path d="M47 46 Q50 49 53 46" fill="none" stroke="#2d1b4e" stroke-width="1.5" stroke-linecap="round"/>${_kawaiiBlushed(34,46,66,46)}<path d="M32 52 Q28 48 26 54" fill="none" stroke="#93c5fd" stroke-width="3" stroke-linecap="round"/><path d="M68 52 Q72 48 74 54" fill="none" stroke="#93c5fd" stroke-width="3" stroke-linecap="round"/><ellipse cx="44" cy="72" rx="5" ry="3" fill="#fbbf24"/><ellipse cx="56" cy="72" rx="5" ry="3" fill="#fbbf24"/>`),
+    // Fledgling - wings spread
+    ()=>petSVG(`<path d="M20 46 Q10 32 18 24 L32 44Z" fill="#93c5fd" opacity="0.7"/><path d="M80 46 Q90 32 82 24 L68 44Z" fill="#93c5fd" opacity="0.7"/><ellipse cx="50" cy="60" rx="20" ry="18" fill="#93c5fd"/><circle cx="50" cy="40" r="22" fill="#bfdbfe"/><circle cx="50" cy="40" r="22" fill="none" stroke="#60a5fa" stroke-width="2"/>${_kawaiiEyes(42,38,58,38)}<path d="M46 32 L50 26 L54 32" fill="#fbbf24"/><path d="M46 46 Q50 50 54 46" fill="none" stroke="#2d1b4e" stroke-width="1.5" stroke-linecap="round"/>${_kawaiiBlushed(33,44,67,44)}<ellipse cx="44" cy="72" rx="5" ry="3" fill="#fbbf24"/><ellipse cx="56" cy="72" rx="5" ry="3" fill="#fbbf24"/><path d="M50 62 Q52 68 50 72 Q54 70 56 66" fill="#60a5fa"/>`),
+    // Hawk - sharp and cool
+    ()=>petSVG(`<path d="M15 42 Q2 26 14 14 L34 40Z" fill="#60a5fa" opacity="0.8"/><path d="M85 42 Q98 26 86 14 L66 40Z" fill="#60a5fa" opacity="0.8"/><ellipse cx="50" cy="60" rx="22" ry="20" fill="#60a5fa"/><circle cx="50" cy="38" r="24" fill="#93c5fd"/><circle cx="50" cy="38" r="24" fill="none" stroke="#3b82f6" stroke-width="2"/><g transform="translate(41,36)"><circle fill="#fff" r="6.5"/><circle fill="#1e3a5f" r="5"/><circle fill="#fff" r="2" cx="-1.5" cy="-1.5"/></g><g transform="translate(59,36)"><circle fill="#fff" r="6.5"/><circle fill="#1e3a5f" r="5"/><circle fill="#fff" r="2" cx="-1.5" cy="-1.5"/></g><path d="M46 30 L50 22 L54 30" fill="#f59e0b"/><path d="M45 44 Q50 49 55 44" fill="none" stroke="#2d1b4e" stroke-width="1.8" stroke-linecap="round"/>${_kawaiiBlushed(31,43,69,43)}<ellipse cx="44" cy="74" rx="6" ry="3.5" fill="#f59e0b"/><ellipse cx="56" cy="74" rx="6" ry="3.5" fill="#f59e0b"/>`),
+    // Golden Eagle - majestic
+    ()=>petSVG(`<path d="M10 40 Q-5 18 12 6 L34 38Z" fill="#3b82f6" opacity="0.8"/><path d="M90 40 Q105 18 88 6 L66 38Z" fill="#3b82f6" opacity="0.8"/><ellipse cx="50" cy="60" rx="24" ry="22" fill="#2563eb"/><circle cx="50" cy="36" r="26" fill="#3b82f6"/><circle cx="50" cy="36" r="26" fill="none" stroke="#1d4ed8" stroke-width="2"/><g transform="translate(40,34)"><circle fill="#fff" r="7"/><circle fill="#fbbf24" r="5.5"/><circle fill="#2d1b4e" r="3.5"/><circle fill="#fff" r="2" cx="-1.5" cy="-1.5"/></g><g transform="translate(60,34)"><circle fill="#fff" r="7"/><circle fill="#fbbf24" r="5.5"/><circle fill="#2d1b4e" r="3.5"/><circle fill="#fff" r="2" cx="-1.5" cy="-1.5"/></g><path d="M45 28 L50 18 L55 28" fill="#f59e0b"/><path d="M44 44 Q50 50 56 44" fill="none" stroke="#e0f2fe" stroke-width="2" stroke-linecap="round"/>${_kawaiiBlushed(29,42,71,42)}<ellipse cx="44" cy="76" rx="6" ry="4" fill="#f59e0b"/><ellipse cx="56" cy="76" rx="6" ry="4" fill="#f59e0b"/><path d="M36 10 L43 8 L50 5 L57 8 L64 10" fill="none" stroke="#ffd700" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="5" r="3" fill="#ffd700"/><text x="18" y="12" font-size="7" fill="#ffd700">&#10024;</text><text x="78" y="12" font-size="7" fill="#ffd700">&#10024;</text>`)
+  ],
+  ocean:[
+    // Egg - bubble egg
+    ()=>petSVG(`<ellipse cx="50" cy="54" rx="28" ry="34" fill="#cffafe"/><ellipse cx="50" cy="54" rx="28" ry="34" fill="none" stroke="#67e8f9" stroke-width="2"/><ellipse cx="40" cy="38" rx="4" ry="5" fill="#fff" opacity="0.3"/>${_kawaiiEyes(42,52,58,52)}<path d="M47 58 Q50 61 53 58" fill="none" stroke="#2d1b4e" stroke-width="1.5" stroke-linecap="round"/>${_kawaiiBlushed(35,57,65,57)}<circle cx="34" cy="40" r="3" fill="#67e8f9" opacity="0.3"/><circle cx="62" cy="44" r="4" fill="#67e8f9" opacity="0.2"/>`),
+    // Guppy - tiny cute fish
+    ()=>petSVG(`<path d="M72 50 L84 40 L84 60Z" fill="#67e8f9"/><ellipse cx="50" cy="50" rx="26" ry="18" fill="#a5f3fc"/><ellipse cx="50" cy="50" rx="26" ry="18" fill="none" stroke="#22d3ee" stroke-width="2"/>${_kawaiiEyes(42,48,56,48)}<path d="M46 54 Q50 57 54 54" fill="none" stroke="#2d1b4e" stroke-width="1.5" stroke-linecap="round"/>${_kawaiiBlushed(36,53,62,53)}<path d="M44 40 Q50 36 56 40" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/><circle cx="30" cy="38" r="2" fill="#67e8f9" opacity="0.5"/><circle cx="22" cy="32" r="1.5" fill="#67e8f9" opacity="0.4"/>`),
+    // Dolphin - playful
+    ()=>petSVG(`<path d="M76 46 Q88 38 86 50 Q84 58 76 54Z" fill="#22d3ee"/><ellipse cx="48" cy="50" rx="30" ry="20" fill="#67e8f9"/><ellipse cx="48" cy="50" rx="30" ry="20" fill="none" stroke="#06b6d4" stroke-width="2"/><path d="M48 32 Q52 24 56 32" fill="#06b6d4"/>${_kawaiiEyes(38,46,54,46)}<path d="M42 54 Q48 58 54 54" fill="none" stroke="#2d1b4e" stroke-width="1.8" stroke-linecap="round"/>${_kawaiiBlushed(30,52,62,52)}<path d="M22 52 Q18 56 20 60" fill="none" stroke="#06b6d4" stroke-width="3" stroke-linecap="round"/><circle cx="24" cy="36" r="2" fill="#a5f3fc" opacity="0.5"/><circle cx="16" cy="42" r="1.5" fill="#a5f3fc" opacity="0.4"/>`),
+    // Shark - cute shark
+    ()=>petSVG(`<path d="M78 46 Q92 36 90 50 Q88 60 78 54Z" fill="#0891b2"/><ellipse cx="48" cy="50" rx="34" ry="22" fill="#06b6d4"/><ellipse cx="48" cy="50" rx="34" ry="22" fill="none" stroke="#0e7490" stroke-width="2"/><path d="M46 30 Q50 18 54 30" fill="#0e7490"/><g transform="translate(38,46)"><circle fill="#fff" r="7"/><circle fill="#164e63" r="5"/><circle fill="#fff" r="2" cx="-1.5" cy="-1.5"/></g><g transform="translate(58,46)"><circle fill="#fff" r="7"/><circle fill="#164e63" r="5"/><circle fill="#fff" r="2" cx="-1.5" cy="-1.5"/></g><path d="M40 56 Q48 60 56 56" fill="none" stroke="#cffafe" stroke-width="2" stroke-linecap="round"/><path d="M40 58 L42 61 L44 58 L46 61 L48 58 L50 61 L52 58 L54 61 L56 58" fill="none" stroke="#fff" stroke-width="1" opacity="0.6"/>${_kawaiiBlushed(28,52,66,52)}`),
+    // Whale - majestic
+    ()=>petSVG(`<path d="M80 42 Q96 32 94 48 Q92 62 80 56Z" fill="#0891b2"/><ellipse cx="46" cy="50" rx="38" ry="28" fill="#06b6d4"/><ellipse cx="46" cy="50" rx="38" ry="28" fill="none" stroke="#0e7490" stroke-width="2"/><ellipse cx="46" cy="56" rx="28" ry="8" fill="#67e8f9" opacity="0.3"/><g transform="translate(34,44)"><circle fill="#fff" r="8"/><circle fill="#164e63" r="6"/><circle fill="#22d3ee" r="3"/><circle fill="#fff" r="2.5" cx="-2" cy="-2"/></g><g transform="translate(58,44)"><circle fill="#fff" r="8"/><circle fill="#164e63" r="6"/><circle fill="#22d3ee" r="3"/><circle fill="#fff" r="2.5" cx="-2" cy="-2"/></g><path d="M40 56 Q46 62 54 56" fill="none" stroke="#cffafe" stroke-width="2" stroke-linecap="round"/>${_kawaiiBlushed(22,54,70,54)}<path d="M40 24 Q44 16 46 24" fill="#67e8f9" opacity="0.6"/><path d="M48 24 Q52 14 54 24" fill="#67e8f9" opacity="0.4"/><path d="M36 10 L43 8 L50 5 L57 8 L64 10" fill="none" stroke="#ffd700" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="5" r="3" fill="#ffd700"/>`,120,100)
+  ]
+};
 const PET_TYPES={
-  dragon:{name:'Dragon',icon:'&#128050;',stages:[
-    {name:'Egg',sprite:'&#129370;',minXP:0,desc:'A warm, scaly egg glows faintly... something powerful stirs within.'},
-    {name:'Hatchling',sprite:'&#129422;',minXP:100,desc:'A tiny lizard emerges! It\'s small but already breathing little sparks.'},
-    {name:'Drake',sprite:'&#128010;',minXP:350,desc:'Your drake is growing scales and claws. It perches on your desk while you study!'},
-    {name:'Dragon',sprite:'&#128009;',minXP:800,desc:'A fearsome dragon! It guards your study space and roars when you finish a session.'},
-    {name:'Elder Dragon',sprite:'&#128050;',minXP:1500,desc:'An ELDER DRAGON! Ancient, wise, and impossibly powerful. A true scholar\'s companion.'}
+  dragon:{name:'Dragon',icon:()=>PET_SPRITES.dragon[4](),stages:[
+    {name:'Egg',sprite:()=>PET_SPRITES.dragon[0](),minXP:0,desc:'A warm, scaly egg glows faintly... something powerful stirs within.'},
+    {name:'Hatchling',sprite:()=>PET_SPRITES.dragon[1](),minXP:100,desc:'A tiny lizard emerges! It\'s small but already breathing little sparks.'},
+    {name:'Drake',sprite:()=>PET_SPRITES.dragon[2](),minXP:350,desc:'Your drake is growing scales and claws. It perches on your desk while you study!'},
+    {name:'Dragon',sprite:()=>PET_SPRITES.dragon[3](),minXP:800,desc:'A fearsome dragon! It guards your study space and roars when you finish a session.'},
+    {name:'Elder Dragon',sprite:()=>PET_SPRITES.dragon[4](),minXP:1500,desc:'An ELDER DRAGON! Ancient, wise, and impossibly powerful. A true scholar\'s companion.'}
   ]},
-  cat:{name:'Cat',icon:'&#128049;',stages:[
-    {name:'Egg',sprite:'&#129370;',minXP:0,desc:'A soft, fuzzy egg purrs gently when you touch it...'},
-    {name:'Kitten',sprite:'&#128049;',minXP:100,desc:'A tiny kitten with big eyes! It bats at your flashcards playfully.'},
-    {name:'Cat',sprite:'&#128008;',minXP:350,desc:'A sleek cat that curls up beside you during study sessions. So cozy!'},
-    {name:'Panther',sprite:'&#128062;',minXP:800,desc:'A majestic panther! Silent and powerful, it watches over your studies with golden eyes.'},
-    {name:'Lion',sprite:'&#129409;',minXP:1500,desc:'The KING of beasts! Your lion roars with pride at every achievement. Legendary!'}
+  cat:{name:'Cat',icon:()=>PET_SPRITES.cat[4](),stages:[
+    {name:'Egg',sprite:()=>PET_SPRITES.cat[0](),minXP:0,desc:'A soft, fuzzy egg purrs gently when you touch it...'},
+    {name:'Kitten',sprite:()=>PET_SPRITES.cat[1](),minXP:100,desc:'A tiny kitten with big eyes! It bats at your flashcards playfully.'},
+    {name:'Cat',sprite:()=>PET_SPRITES.cat[2](),minXP:350,desc:'A sleek cat that curls up beside you during study sessions. So cozy!'},
+    {name:'Panther',sprite:()=>PET_SPRITES.cat[3](),minXP:800,desc:'A majestic panther! Silent and powerful, it watches over your studies with glowing eyes.'},
+    {name:'Lion',sprite:()=>PET_SPRITES.cat[4](),minXP:1500,desc:'The KING of beasts! Your lion roars with pride at every achievement. Legendary!'}
   ]},
-  bird:{name:'Eagle',icon:'&#129413;',stages:[
-    {name:'Egg',sprite:'&#129370;',minXP:0,desc:'A speckled egg sits in a sturdy nest on a high cliff...'},
-    {name:'Eaglet',sprite:'&#128035;',minXP:100,desc:'A fluffy eaglet! It chirps excitedly whenever you review flashcards.'},
-    {name:'Fledgling',sprite:'&#128038;',minXP:350,desc:'Your young eagle is growing flight feathers! It hops around your desk eagerly.'},
-    {name:'Hawk',sprite:'&#128053;',minXP:800,desc:'A sharp-eyed hawk! It spots every mistake in your quizzes before you do.'},
-    {name:'Golden Eagle',sprite:'&#129413;',minXP:1500,desc:'A LEGENDARY golden eagle! It soars above all others. The sky is yours, scholar!'}
+  bird:{name:'Eagle',icon:()=>PET_SPRITES.bird[4](),stages:[
+    {name:'Egg',sprite:()=>PET_SPRITES.bird[0](),minXP:0,desc:'A speckled egg sits in a sturdy nest on a high cliff...'},
+    {name:'Eaglet',sprite:()=>PET_SPRITES.bird[1](),minXP:100,desc:'A fluffy eaglet! It chirps excitedly whenever you review flashcards.'},
+    {name:'Fledgling',sprite:()=>PET_SPRITES.bird[2](),minXP:350,desc:'Your young eagle is growing flight feathers! It hops around your desk eagerly.'},
+    {name:'Hawk',sprite:()=>PET_SPRITES.bird[3](),minXP:800,desc:'A sharp-eyed hawk! It spots every mistake in your quizzes before you do.'},
+    {name:'Golden Eagle',sprite:()=>PET_SPRITES.bird[4](),minXP:1500,desc:'A LEGENDARY golden eagle! It soars above all others. The sky is yours, scholar!'}
   ]},
-  ocean:{name:'Ocean',icon:'&#128011;',stages:[
-    {name:'Egg',sprite:'&#129370;',minXP:0,desc:'A shimmering bubble floats gently... something swims inside.'},
-    {name:'Guppy',sprite:'&#128032;',minXP:100,desc:'A tiny tropical fish! It blows happy bubbles when you complete tasks.'},
-    {name:'Dolphin',sprite:'&#128044;',minXP:350,desc:'A playful dolphin! It leaps and spins when you hit study streaks.'},
-    {name:'Shark',sprite:'&#129416;',minXP:800,desc:'A powerful shark! Nothing gets past those jaws — just like your study habits.'},
-    {name:'Whale',sprite:'&#128011;',minXP:1500,desc:'A LEGENDARY whale! Majestic ruler of the deep. Your knowledge is as vast as the ocean.'}
+  ocean:{name:'Ocean',icon:()=>PET_SPRITES.ocean[4](),stages:[
+    {name:'Egg',sprite:()=>PET_SPRITES.ocean[0](),minXP:0,desc:'A shimmering bubble floats gently... something swims inside.'},
+    {name:'Guppy',sprite:()=>PET_SPRITES.ocean[1](),minXP:100,desc:'A tiny tropical fish! It blows happy bubbles when you complete tasks.'},
+    {name:'Dolphin',sprite:()=>PET_SPRITES.ocean[2](),minXP:350,desc:'A playful dolphin! It leaps and spins when you hit study streaks.'},
+    {name:'Shark',sprite:()=>PET_SPRITES.ocean[3](),minXP:800,desc:'A powerful shark! Nothing gets past those jaws — just like your study habits.'},
+    {name:'Whale',sprite:()=>PET_SPRITES.ocean[4](),minXP:1500,desc:'A LEGENDARY whale! Majestic ruler of the deep. Your knowledge is as vast as the ocean.'}
   ]}
 };
 function getStagesForPet(){const pet=getPet();return (PET_TYPES[pet.type]||PET_TYPES.dragon).stages}
@@ -1794,9 +1850,9 @@ function renPet(){
       chooser.style.display='';
       petMain.style.display='none';
       chooser.innerHTML='<h3 style="text-align:center;margin-bottom:6px">Choose Your Beast!</h3><p style="text-align:center;color:var(--muted);font-size:0.88rem;margin-bottom:16px">Pick a creature to raise. Each has a unique evolution path!</p><div class="pet-type-grid">'+
-        Object.entries(PET_TYPES).map(([key,t])=>`<div class="pet-type-card" onclick="choosePetType('${key}')"><div style="font-size:3rem;margin-bottom:6px">${t.icon}</div><div style="font-weight:700;margin-bottom:4px">${t.name}</div><div style="font-size:0.72rem;color:var(--muted);line-height:1.4">${t.stages.map(s=>s.sprite).join(' → ')}</div><div style="font-size:0.7rem;color:var(--muted);margin-top:4px">${t.stages.map(s=>s.name).join(' → ')}</div></div>`).join('')+'</div>';
+        Object.entries(PET_TYPES).map(([key,t])=>{const iconSvg=typeof t.icon==='function'?t.icon():'';const previews=t.stages.map(s=>{const sp=typeof s.sprite==='function'?s.sprite():s.sprite;return `<span style="display:inline-block;width:28px;height:28px;vertical-align:middle">${sp}</span>`;}).join(' <span style="color:var(--muted)">→</span> ');return `<div class="pet-type-card" onclick="choosePetType('${key}')"><div style="width:64px;height:64px;margin:0 auto 8px">${iconSvg}</div><div style="font-weight:700;margin-bottom:6px;font-size:1rem">${t.name}</div><div style="font-size:0.72rem;color:var(--muted);line-height:1.8;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px">${previews}</div><div style="font-size:0.68rem;color:var(--muted);margin-top:6px">${t.stages.map(s=>s.name).join(' → ')}</div></div>`}).join('')+'</div>';
       // Still update dashboard widget with egg
-      const dashSprite=document.getElementById('dashPetSprite');if(dashSprite)dashSprite.innerHTML='&#129370;';
+      const dashSprite=document.getElementById('dashPetSprite');if(dashSprite)dashSprite.innerHTML=PET_SPRITES.dragon[0]();
       const dashName=document.getElementById('dashPetName');if(dashName)dashName.textContent='Choose your pet!';
       const dashStatus=document.getElementById('dashPetStatus');if(dashStatus)dashStatus.textContent='Tap to pick a beast to raise!';
       return;
@@ -1808,7 +1864,7 @@ function renPet(){
   // Pet page elements
   const sprite=document.getElementById('petSprite');
   if(sprite){
-    sprite.innerHTML=stageData.sprite;
+    sprite.innerHTML=typeof stageData.sprite==='function'?stageData.sprite():stageData.sprite;
     sprite.className='pet-sprite';
     if(mood>=80)sprite.classList.add('happy');
     else if(mood<20)sprite.classList.add('hungry');
@@ -1839,14 +1895,14 @@ function renPet(){
 
   // Evolution timeline
   const timeline=document.getElementById('petEvoTimeline');
-  if(timeline)timeline.innerHTML=stages.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;${i<=stage?'':'opacity:0.35'}">${s.sprite} <strong>${s.name}</strong> <span style="color:var(--muted)">(${s.minXP} XP)</span> ${i===stage?'<span style="color:var(--accent4);font-size:0.75rem">&#9668; Current</span>':i<stage?'<span style="color:var(--accent4)">&#10003;</span>':''}</div>`).join('');
+  if(timeline)timeline.innerHTML=stages.map((s,i)=>{const sp=typeof s.sprite==='function'?s.sprite():s.sprite;return `<div style="display:flex;align-items:center;gap:8px;${i<=stage?'':'opacity:0.35'}"><span style="display:inline-block;width:32px;height:32px;vertical-align:middle">${sp}</span> <strong>${s.name}</strong> <span style="color:var(--muted)">(${s.minXP} XP)</span> ${i===stage?'<span style="color:var(--accent4);font-size:0.75rem">&#9668; Current</span>':i<stage?'<span style="color:var(--accent4)">&#10003;</span>':''}</div>`}).join('');
 
   // Change type button
   const changeType=document.getElementById('petChangeType');
-  if(changeType)changeType.innerHTML=Object.entries(PET_TYPES).map(([key,t])=>`<button class="btn ${pet.type===key?'btn-p':'btn-g'} btn-s" onclick="choosePetType('${key}')" style="font-size:0.78rem">${t.icon} ${t.name}</button>`).join('');
+  if(changeType)changeType.innerHTML=Object.entries(PET_TYPES).map(([key,t])=>`<button class="btn ${pet.type===key?'btn-p':'btn-g'} btn-s" onclick="choosePetType('${key}')" style="font-size:0.78rem;display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:18px;height:18px">${typeof t.icon==='function'?t.icon():t.icon}</span> ${t.name}</button>`).join('');
 
   // Dashboard mini widget
-  const dashSprite=document.getElementById('dashPetSprite');if(dashSprite)dashSprite.innerHTML=stageData.sprite;
+  const dashSprite=document.getElementById('dashPetSprite');if(dashSprite)dashSprite.innerHTML=typeof stageData.sprite==='function'?stageData.sprite():stageData.sprite;
   const dashName=document.getElementById('dashPetName');if(dashName)dashName.textContent=pet.name;
   const dashStatus=document.getElementById('dashPetStatus');
   if(dashStatus){
