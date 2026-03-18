@@ -807,6 +807,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <h3 style="font-size:0.92rem;margin-bottom:10px">Members</h3>
 <div id="roomMembers" style="display:grid;gap:10px"></div>
 <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px">
+<h3 style="font-size:0.92rem;margin-bottom:10px">Leaderboard</h3>
+<div id="roomLeaderboard" style="display:grid;gap:8px;margin-bottom:16px"></div>
+</div>
+<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:16px">
 <h3 style="font-size:0.92rem;margin-bottom:10px">Room Chat</h3>
 <div id="roomChat" style="max-height:250px;overflow-y:auto;margin-bottom:10px;padding:8px;background:rgba(0,0,0,0.2);border-radius:10px;min-height:80px"></div>
 <div style="display:flex;gap:6px"><input type="text" id="roomMsg" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()" style="flex:1;padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);border-radius:10px;font-size:0.85rem"><button class="btn btn-p btn-s" onclick="sendMsg()">Send</button></div>
@@ -1363,6 +1367,26 @@ const ROOM_COLORS=['#7c3aed','#06b6d4','#f43f5e','#10b981','#f59e0b','#ff00ff','
 const RELAY_URL='wss://studybeast-relay.onrender.com';
 let ws=null, roomMembers={}, roomCode='', roomMyId='', roomStatusInterval=null, chatSeen=new Set();
 
+function saveRoomState(){
+  if(roomCode&&roomMyId){
+    sessionStorage.setItem('sb_room',JSON.stringify({code:roomCode,myId:roomMyId,name:getMyName()}));
+  }else{
+    sessionStorage.removeItem('sb_room');
+  }
+}
+function loadRoomState(){return JSON.parse(sessionStorage.getItem('sb_room')||'null')}
+async function autoRejoinRoom(){
+  const rs=loadRoomState();
+  if(!rs)return;
+  document.getElementById('roomName').value=rs.name||'';
+  try{await connectWS()}catch(e){sessionStorage.removeItem('sb_room');return}
+  roomCode=rs.code;
+  roomMyId=rs.myId;
+  const st=getMyStatus();
+  if(roomMyId.startsWith('host_'))st.isHost=true;
+  wsSend({type:'join',code:roomCode,userId:roomMyId,status:st});
+}
+
 function genRoomCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<5;i++)r+=c[Math.floor(Math.random()*c.length)];return r}
 function getMyName(){return document.getElementById('roomName').value.trim()||'Anonymous'}
 function getMyColor(){return ROOM_COLORS[getMyName().length%ROOM_COLORS.length]}
@@ -1399,15 +1423,18 @@ function handleServerMsg(msg){
       showRoomActive();
       toast('Room created! Share the code.');
       startStatusSync();
+      saveRoomState();
       break;
     case 'joined':
       showRoomActive();
       toast('Joined room!');
       startStatusSync();
+      saveRoomState();
       break;
     case 'error':
       toast(msg.msg||'Room not found. Check the code and try again.');
       roomCode='';roomMyId='';
+      saveRoomState();
       break;
     case 'members':
       roomMembers=msg.members||{};
@@ -1493,6 +1520,30 @@ function renRoomMembers(){
       <div class="rm-pulse"></div>
     </div>`;
   }).join('');
+  renLeaderboard();
+}
+
+function renLeaderboard(){
+  const el=document.getElementById('roomLeaderboard');if(!el)return;
+  const medals=['&#129351;','&#129352;','&#129353;'];
+  const sorted=Object.entries(roomMembers).sort((a,b)=>{
+    const al=a[1].level||1,bl=b[1].level||1;
+    if(bl!==al)return bl-al;
+    return(b[1].xp||0)-(a[1].xp||0);
+  });
+  if(!sorted.length){el.innerHTML='<p style="color:var(--muted);font-size:0.85rem">No members yet</p>';return}
+  el.innerHTML=sorted.map(([id,m],i)=>{
+    const isMe=id===roomMyId;
+    const rank=i<3?medals[i]:`<span style="font-weight:700;color:var(--muted)">#${i+1}</span>`;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:${isMe?'rgba(124,58,237,0.15)':'rgba(255,255,255,0.04)'};border-radius:10px;border:1px solid ${isMe?'var(--accent1)':'var(--border)'}">
+      <div style="font-size:1.2rem;min-width:28px;text-align:center">${rank}</div>
+      <div class="rm-av" style="background:${m.color||'var(--accent1)'};width:30px;height:30px;font-size:0.8rem">${(m.name||'?')[0].toUpperCase()}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.name||'?')}${isMe?' (You)':''}</div>
+        <div style="font-size:0.78rem;color:var(--muted)">Lv ${m.level||1} &middot; ${m.xp||0} XP &middot; ${m.streak||0} day streak</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function showRoomActive(){
@@ -1524,9 +1575,11 @@ function leaveRoom(){
   if(roomStatusInterval){clearInterval(roomStatusInterval);roomStatusInterval=null}
   wsSend({type:'leave'});
   roomMembers={};roomCode='';roomMyId='';chatSeen.clear();
+  saveRoomState();
   document.getElementById('roomLobby').style.display='block';
   document.getElementById('roomActive').style.display='none';
   document.getElementById('roomChat').innerHTML='';
+  document.getElementById('roomLeaderboard').innerHTML='';
   toast('Left the room');
 }
 
@@ -1883,6 +1936,7 @@ function initApp(){
     document.documentElement.setAttribute('data-theme',D.settings.theme||'midnight');
     getPet();
     updDash();updPD();renDk();renN();renT();renPLog();renHab();renGoals();renAmb();renJournal();updAutoBtn();updCUTarget();renCUSessions();
+    autoRejoinRoom();
   }catch(e){console.error('initApp error:',e)}
 }
 document.documentElement.setAttribute('data-theme',D.settings.theme||'midnight');
