@@ -1454,6 +1454,7 @@ function handleServerMsg(msg){
       toast('Joined room!');
       startStatusSync();
       saveRoomState();
+      go('room');
       break;
     case 'error':
       toast(msg.msg||'Room not found. Check the code and try again.');
