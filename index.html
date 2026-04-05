@@ -525,7 +525,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="sdiv"></div>
 <button class="nav-btn" data-p="stats" onclick="go('stats')"><span>&#9670;</span><span class="tt">Stats</span></button>
 <button class="nav-btn" data-p="settings" onclick="go('settings')"><span>&#9881;</span><span class="tt">Settings</span></button>
-<button class="nav-btn" data-p="admin" onclick="go('admin')" id="adminNavBtn"><span>&#128737;</span><span class="tt">Admin</span></button>
 </nav>
 
 <!-- Mobile Bottom Nav -->
@@ -538,7 +537,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <button class="bnav-btn" data-p="room" onclick="go('room')"><span>&#128101;</span><span class="bl">Room</span></button>
 <button class="bnav-btn" data-p="stats" onclick="go('stats')"><span>&#9670;</span><span class="bl">Stats</span></button>
 <button class="bnav-btn" data-p="settings" onclick="go('settings')"><span>&#9881;</span><span class="bl">More</span></button>
-<button class="bnav-btn" data-p="admin" onclick="go('admin')"><span>&#128737;</span><span class="bl">Admin</span></button>
 </div></nav>
 
 <div class="main">
@@ -853,6 +851,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="srow"><label>Restore Data</label><input type="file" id="importFile" accept=".json" style="font-size:0.82rem" onchange="importData(event)"></div>
 <div class="srow"><label>Account</label><div class="login-user-info"><div class="user-avatar" id="settUserAv"></div><span id="settUserName"></span><button class="btn btn-d btn-s" onclick="doLogout()">Logout</button></div></div>
 <div class="srow"><label style="color:var(--accent3)">Reset All Data</label><button class="btn btn-d btn-s" onclick="resetAll()">Reset</button></div>
+<div class="srow"><label>&#128737; Admin Panel</label><button class="btn btn-p btn-s" onclick="go('admin')">Open Admin</button></div>
 </div>
 <div class="glass" style="margin-top:14px">
 <h3 style="font-size:0.92rem;margin-bottom:8px">Keyboard Shortcuts</h3>
