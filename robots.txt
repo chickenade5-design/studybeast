@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://chickenade5-design.github.io/studybeast/sitemap.xml
