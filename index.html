@@ -414,6 +414,44 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 .admin-lock input{text-align:center;margin-top:12px}
 @media(max-width:768px){.admin-grid{grid-template-columns:1fr 1fr}}
 
+/* Due alert */
+.due-alert{background:linear-gradient(135deg,rgba(244,63,94,0.12),rgba(124,58,237,0.08));border:1px solid rgba(244,63,94,0.25);border-radius:14px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;animation:fadeUp 0.3s ease}
+.due-alert .da-text{font-size:0.9rem;font-weight:600}.due-alert .da-count{color:var(--accent3);font-weight:800}
+/* Streak freeze */
+.freeze-badge{background:rgba(6,182,212,0.15);color:var(--accent2);padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;display:inline-flex;align-items:center;gap:3px}
+/* Weekly recap */
+.recap-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center}
+.recap-overlay.open{display:flex}
+.recap-box{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:20px;width:90%;max-width:500px;padding:28px;animation:fadeUp 0.3s ease;max-height:90vh;overflow-y:auto}
+.recap-stat{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.88rem}
+.recap-stat .rs-val{font-weight:800;font-size:1.1rem}
+.recap-stat .rs-delta{font-size:0.75rem;font-weight:600;padding:2px 8px;border-radius:10px}
+.rs-up{background:rgba(16,185,129,0.15);color:var(--accent4)}.rs-down{background:rgba(244,63,94,0.12);color:var(--accent3)}.rs-same{background:rgba(255,255,255,0.06);color:var(--muted)}
+/* Calendar */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
+.cal-hdr{font-size:0.65rem;color:var(--muted);text-align:center;padding:4px 0}
+.cal-day{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;cursor:default;transition:all 0.15s;position:relative}
+.cal-day.empty{background:transparent}.cal-day.has{cursor:pointer}.cal-day.has:hover{transform:scale(1.15)}
+.cal-day.today{border:1.5px solid var(--accent1)}
+.cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.cal-nav button{background:none;border:none;color:var(--text);cursor:pointer;font-size:1rem;padding:4px 8px}
+.cal-nav span{font-size:0.85rem;font-weight:600}
+/* Subtask */
+.subtask{display:flex;align-items:center;gap:8px;padding:5px 0 5px 28px;font-size:0.82rem}
+.subtask input[type=checkbox]{width:14px;height:14px;accent-color:var(--accent2)}
+.subtask.done span{text-decoration:line-through;opacity:0.5}
+.st-add{font-size:0.75rem;color:var(--accent2);cursor:pointer;padding:3px 0 3px 28px;opacity:0.7;transition:opacity 0.2s}
+.st-add:hover{opacity:1}
+/* Achievement popup */
+.ach-popup{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(124,58,237,0.15));backdrop-filter:blur(12px);border:1px solid var(--accent4);color:var(--text);padding:14px 24px;border-radius:16px;z-index:250;animation:achIn 0.5s ease;box-shadow:0 8px 30px rgba(16,185,129,0.2);text-align:center}
+@keyframes achIn{0%{opacity:0;transform:translateX(-50%) translateY(-20px) scale(0.9)}100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+/* Deck share */
+.share-code{width:100%;min-height:80px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px;font-family:monospace;font-size:0.75rem;resize:vertical;word-break:break-all}
+/* Note folder */
+.nf-bar{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:4px}
+.nf-tag{padding:3px 10px;border-radius:20px;font-size:0.7rem;cursor:pointer;white-space:nowrap;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--muted);transition:all 0.15s}
+.nf-tag.active{background:rgba(124,58,237,0.15);border-color:var(--accent1);color:var(--accent1)}
+
 /* Streak celebration */
 @keyframes streakGlow{0%,100%{box-shadow:0 0 0 rgba(245,158,11,0)}50%{box-shadow:0 0 12px rgba(245,158,11,0.3)}}
 .badge-st.hot{animation:streakGlow 2s ease-in-out infinite}
@@ -554,9 +592,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="header"><h2>Dashboard</h2><div class="hr">
 <span class="badge badge-rank" id="rankBadge"></span>
 <span class="badge badge-st" id="streakB">0 day streak</span>
+<span class="freeze-badge" id="freezeB" style="display:none">&#10052; <span id="freezeCount">0</span></span>
 <div><div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div><div class="xp-label"><span id="xpT">0</span>/<span id="xpM">100</span> XP</div></div>
 <span class="badge badge-lv" id="lvB">Lv 1</span>
 </div></div>
+<div id="dueAlert"></div>
 <!-- Quick Add -->
 <div class="quick-add"><input type="text" id="quickAdd" placeholder="Quick add task... (press Enter)" onkeydown="if(event.key==='Enter')quickAddTask()"><button class="btn btn-p" onclick="quickAddTask()">Add</button></div>
 <!-- Today's Progress -->
@@ -646,12 +686,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 
 <!-- FLASHCARDS -->
 <div class="panel" id="p-fc">
-<div class="header"><h2>Flashcards</h2><div style="display:flex;gap:7px"><button class="btn btn-g" onclick="openM('impM')">Import CSV</button><button class="btn btn-p" onclick="openM('deckM')">+ New Deck</button></div></div>
+<div class="header"><h2>Flashcards</h2><div style="display:flex;gap:7px"><button class="btn btn-g btn-s" onclick="openM('importShareM')">Import Code</button><button class="btn btn-g" onclick="openM('impM')">Import CSV</button><button class="btn btn-p" onclick="openM('deckM')">+ New Deck</button></div></div>
 <div id="dkLV"><div class="dl" id="dkList"></div></div>
 <div id="dkSV" style="display:none">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:7px">
 <button class="btn btn-g" onclick="backDk()">&#8592; Back</button>
-<div style="display:flex;gap:7px"><button class="btn btn-g btn-s" onclick="exportDk()">Export</button><button class="btn btn-p btn-s" onclick="openM('cardM')">+ Add Card</button></div>
+<div style="display:flex;gap:7px"><button class="btn btn-g btn-s" onclick="shareDk()">Share</button><button class="btn btn-g btn-s" onclick="exportDk()">Export</button><button class="btn btn-g btn-s" id="revBtn" onclick="toggleReverse()">Reverse</button><button class="btn btn-p btn-s" onclick="openM('cardM')">+ Add Card</button></div>
 </div>
 <div style="text-align:center;color:var(--muted);font-size:0.83rem;margin-bottom:10px" id="cProg">0/0</div>
 <div class="fa"><div class="fc" id="fcard" onclick="flipC()"><div class="ff" id="cFront">Front</div><div class="ff fb" id="cBack">Back</div></div></div>
@@ -661,7 +701,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 
 <!-- NOTES -->
 <div class="panel" id="p-notes">
-<div class="header"><h2>Notes</h2><div style="display:flex;gap:7px"><button class="btn btn-g btn-s" onclick="exportAllN()">Export All</button><button class="btn btn-p" onclick="createN()">+ New Note</button></div></div>
+<div class="header"><h2>Notes</h2><div style="display:flex;gap:7px"><button class="btn btn-g btn-s" onclick="openM('noteFolderM')">+ Folder</button><button class="btn btn-g btn-s" onclick="exportAllN()">Export All</button><button class="btn btn-p" onclick="createN()">+ New Note</button></div></div>
+<div class="nf-bar" id="nfBar"></div>
 <div class="ns"><div class="nlp" id="nList"></div>
 <div class="ne" id="nEdit"><input type="text" id="nTitle" placeholder="Note title..." oninput="saveN()">
 <div class="ntb"><span class="ntag" id="nWC">0 words</span><span class="ntag" id="nCC">0 chars</span><span class="ntag" id="nRT">0 min read</span><button class="btn btn-g btn-s" style="margin-left:auto" onclick="exportN()">Export</button><button class="btn btn-g btn-s" onclick="togglePrev()">Preview</button></div>
@@ -744,6 +785,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="glass"><h3 style="font-size:0.92rem;margin-bottom:3px">Study Time (7d)</h3><div class="bar-chart" id="chW"></div></div>
 <div class="glass"><h3 style="font-size:0.92rem;margin-bottom:3px">Cards (7d)</h3><div class="bar-chart" id="chC"></div></div>
 </div>
+<div class="glass" style="margin-top:14px"><h3 style="font-size:0.92rem;margin-bottom:3px">Study Calendar</h3><div id="studyCal"></div></div>
 <div class="g2" style="margin-top:14px">
 <div class="glass"><h3 style="font-size:0.92rem;margin-bottom:10px">All-Time</h3><div style="font-size:0.88rem;line-height:2" id="allStats"></div></div>
 <div class="glass"><h3 style="font-size:0.92rem;margin-bottom:10px">Achievements</h3><div id="achList" style="display:flex;flex-wrap:wrap;gap:7px"></div></div>
@@ -853,6 +895,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="srow"><label>Short Break (min)</label><input type="number" id="sShort" value="5" min="1" max="30" style="width:80px" onchange="saveSett()"></div>
 <div class="srow"><label>Long Break (min)</label><input type="number" id="sLong" value="15" min="1" max="60" style="width:80px" onchange="saveSett()"></div>
 <div class="srow"><label>Auto-start Next Session</label><button class="toggle" id="sAuto" onclick="togAutoStart()"></button></div>
+<div class="srow"><label>Auto Theme (follow system)</label><button class="toggle" id="sAutoTheme" onclick="togAutoTheme()"></button></div>
+<div class="srow"><label>Daily Card Target</label><input type="number" id="sDailyCards" value="20" min="1" max="200" style="width:80px" onchange="saveDailyTargets()"></div>
+<div class="srow"><label>Daily Minutes Target</label><input type="number" id="sDailyMins" value="60" min="5" max="600" style="width:80px" onchange="saveDailyTargets()"></div>
+<div class="srow"><label>Daily Pomo Target</label><input type="number" id="sDailyPomos" value="4" min="1" max="20" style="width:80px" onchange="saveDailyTargets()"></div>
 <div class="srow"><label>Sound Effects</label><select id="sSfx" style="width:80px" onchange="saveSett()"><option value="on">On</option><option value="off">Off</option></select></div>
 <div class="srow"><label>Notifications</label><button class="btn btn-g btn-s" onclick="reqNotif()">Enable</button></div>
 <div class="srow"><label>Backup Data</label><button class="btn btn-g btn-s" onclick="exportData()">Export JSON</button></div>
@@ -916,6 +962,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="mo" id="taskM"><div class="md"><h3>Add Task</h3><div class="fg"><label>Task</label><input type="text" id="ntT" placeholder="Review chapter 3"></div><div class="fg"><label>Due (optional)</label><input type="text" id="ntD" placeholder="Friday"></div><div class="fg"><label>Priority</label><select id="ntP"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div><div style="display:flex;gap:7px;justify-content:flex-end"><button class="btn btn-g" onclick="closeM('taskM')">Cancel</button><button class="btn btn-p" onclick="addT()">Add</button></div></div></div>
 <div class="mo" id="habM"><div class="md"><h3>New Habit</h3><div class="fg"><label>Name</label><input type="text" id="nhN" placeholder="Read 30 min"></div><div style="display:flex;gap:7px;justify-content:flex-end"><button class="btn btn-g" onclick="closeM('habM')">Cancel</button><button class="btn btn-p" onclick="addHab()">Add</button></div></div></div>
 <div class="mo" id="goalM"><div class="md"><h3>New Goal</h3><div class="fg"><label>Goal</label><input type="text" id="ngN" placeholder="Complete 100 cards"></div><div class="fg"><label>Target</label><input type="number" id="ngT" value="100" min="1"></div><div class="fg"><label>Track</label><select id="ngTy"><option value="cards">Cards</option><option value="pomos">Pomodoros</option><option value="quizzes">Quizzes</option><option value="minutes">Minutes</option><option value="manual">Manual</option></select></div><div style="display:flex;gap:7px;justify-content:flex-end"><button class="btn btn-g" onclick="closeM('goalM')">Cancel</button><button class="btn btn-p" onclick="addGoal()">Add</button></div></div></div>
+<div class="mo" id="shareM"><div class="md"><h3>Share Deck</h3><p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px">Copy this code and send it to a friend to share your deck.</p><textarea class="share-code" id="shareCode" readonly></textarea><div style="display:flex;gap:7px;margin-top:10px"><button class="btn btn-p btn-s" onclick="copyShareCode()">Copy Code</button><button class="btn btn-g" onclick="closeM('shareM')">Close</button></div></div></div>
+<div class="mo" id="importShareM"><div class="md"><h3>Import Shared Deck</h3><p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px">Paste a deck code from a friend.</p><textarea class="share-code" id="importShareCode" placeholder="Paste deck code here..."></textarea><div style="display:flex;gap:7px;margin-top:10px;justify-content:flex-end"><button class="btn btn-g" onclick="closeM('importShareM')">Cancel</button><button class="btn btn-p" onclick="importSharedDeck()">Import</button></div></div></div>
+<div class="mo" id="subtaskM"><div class="md"><h3>Add Subtask</h3><div class="fg"><label>Subtask</label><input type="text" id="stText" placeholder="Subtask description" onkeydown="if(event.key==='Enter')addSubtask()"></div><div style="display:flex;gap:7px;justify-content:flex-end"><button class="btn btn-g" onclick="closeM('subtaskM')">Cancel</button><button class="btn btn-p" onclick="addSubtask()">Add</button></div></div></div>
+<div class="mo" id="noteFolderM"><div class="md"><h3>New Folder</h3><div class="fg"><label>Folder Name</label><input type="text" id="nfName" placeholder="e.g. Biology" onkeydown="if(event.key==='Enter')addNoteFolder()"></div><div style="display:flex;gap:7px;justify-content:flex-end"><button class="btn btn-g" onclick="closeM('noteFolderM')">Cancel</button><button class="btn btn-p" onclick="addNoteFolder()">Add</button></div></div></div>
+<div class="recap-overlay" id="recapOverlay" onclick="if(event.target===this)closeRecap()"><div class="recap-box" id="recapBox"></div></div>
 
 <script>
 // ===== AUTH =====
@@ -989,7 +1040,7 @@ function getUserDB(){return authUser?'sb3_'+authUser:'sb3'}
 // ===== DATA =====
 function getDBKey(){return authUser?'sb3_'+authUser:'sb3'}
 let D=ld();
-function ld(){const DB=getDBKey();try{const r=localStorage.getItem(DB);if(r){const d=JSON.parse(r);['habits','goals','dailyCards','dailyMinutes','journal','settings','cuSessions','pet'].forEach(k=>{if(!d[k])d[k]=k==='settings'?{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false}:k==='journal'||k==='cuSessions'?[]:k==='pet'?{name:'Study Beast',xp:0,pats:0,feeds:0,lastFed:null,created:new Date().toISOString().split('T')[0],mood:50}:{}});if(!d.settings.autoStart)d.settings.autoStart=false;return d;}}catch(e){}return{xp:0,level:1,streak:0,lastStudy:null,cardsReviewed:0,pomosCompleted:0,quizCorrect:0,quizTotal:0,studyMinutes:0,activity:{},decks:[],notes:[],tasks:[],pomoLog:[],habits:[],goals:[],dailyCards:{},dailyMinutes:{},journal:[],cuSessions:[],settings:{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false}}}
+function ld(){const DB=getDBKey();try{const r=localStorage.getItem(DB);if(r){const d=JSON.parse(r);['habits','goals','dailyCards','dailyMinutes','journal','settings','cuSessions','pet'].forEach(k=>{if(!d[k])d[k]=k==='settings'?{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false}:k==='journal'||k==='cuSessions'?[]:k==='pet'?{name:'Study Beast',xp:0,pats:0,feeds:0,lastFed:null,created:new Date().toISOString().split('T')[0],mood:50}:{}});if(!d.settings.autoStart)d.settings.autoStart=false;if(!d.streakFreezes)d.streakFreezes=0;if(!d.streakFreezesUsed)d.streakFreezesUsed={};if(!d.achievementsSeen)d.achievementsSeen={};if(!d.lastRecapWeek)d.lastRecapWeek='';if(!d.settings.dailyTargets)d.settings.dailyTargets={cards:20,minutes:60,pomos:4};if(!d.settings.autoTheme)d.settings.autoTheme=false;if(!d.noteFolders)d.noteFolders=[];if(!d.lastPomoPanel)d.lastPomoPanel='';return d;}}catch(e){}return{xp:0,level:1,streak:0,lastStudy:null,cardsReviewed:0,pomosCompleted:0,quizCorrect:0,quizTotal:0,studyMinutes:0,activity:{},decks:[],notes:[],tasks:[],pomoLog:[],habits:[],goals:[],dailyCards:{},dailyMinutes:{},journal:[],cuSessions:[],streakFreezes:0,streakFreezesUsed:{},achievementsSeen:{},lastRecapWeek:'',noteFolders:[],lastPomoPanel:'',settings:{theme:'midnight',focus:25,short:5,long:15,sfx:'on',autoStart:false,autoTheme:false,dailyTargets:{cards:20,minutes:60,pomos:4}}}}
 function sv(){localStorage.setItem(getDBKey(),JSON.stringify(D))}
 function today(){return new Date().toISOString().split('T')[0]}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
@@ -998,7 +1049,7 @@ const ranks=['Novice','Learner','Scholar','Sage','Master','Grandmaster','Legend'
 function getRank(){return ranks[Math.min(Math.floor(D.level/3),ranks.length-1)]}
 
 function addXP(n){D.xp+=n;const need=D.level*100;while(D.xp>=need){D.xp-=need;D.level++;toast(`Level Up! Level ${D.level}!`);confetti();}sv();updHead()}
-function recAct(){const t=today();D.activity[t]=(D.activity[t]||0)+1;if(D.lastStudy!==t){const y=new Date(Date.now()-864e5).toISOString().split('T')[0];D.streak=D.lastStudy===y?D.streak+1:1;D.lastStudy=t}sv()}
+function recAct(){const t=today();D.activity[t]=(D.activity[t]||0)+1;if(D.lastStudy!==t){const y=new Date(Date.now()-864e5).toISOString().split('T')[0];if(D.lastStudy===y){D.streak++}else if(D.lastStudy){const daysSince=Math.floor((new Date(t)-new Date(D.lastStudy))/864e5);if(daysSince>=2&&D.streakFreezes>0&&!D.streakFreezesUsed[t]){D.streakFreezes--;D.streakFreezesUsed[t]=true;toast('Streak freeze used! ❄️');D.streak++}else if(daysSince>=2){D.streak=1}}else{D.streak=1}D.lastStudy=t}sv()}
 function updGoals(ty,n){D.goals.forEach(g=>{if(g.type===ty){g.current=Math.min(g.current+n,g.target);if(g.current>=g.target)toast(`Goal complete: ${g.name}!`)}});sv()}
 
 // ===== QUOTES =====
@@ -1039,6 +1090,7 @@ function go(n){
   if(n==='cu'){updCUTarget();renCUSessions()}
   if(n==='pet')renPet()
   if(n==='admin'&&isAdmin)renAdmin()
+  if(pomo.on&&n!=='pomo'&&n!=='dash')D.lastPomoPanel=n
 }
 function openM(id){document.getElementById(id).classList.add('open')}
 function closeM(id){document.getElementById(id).classList.remove('open')}
@@ -1050,6 +1102,7 @@ function updHead(){
   document.getElementById('lvB').textContent='Lv '+D.level;
   document.getElementById('streakB').textContent=D.streak+' day streak';
   document.getElementById('rankBadge').textContent=getRank();
+  const fb=document.getElementById('freezeB');if(fb){if(D.streakFreezes>0){fb.style.display='';document.getElementById('freezeCount').textContent=D.streakFreezes}else{fb.style.display='none'}}
 }
 function confetti(){
   const cols=['#7c3aed','#06b6d4','#f43f5e','#10b981','#f59e0b','#ff00ff','#00ff88'];
@@ -1064,8 +1117,12 @@ function reqNotif(){Notification.requestPermission().then(p=>{toast(p==='granted
 
 // ===== DASHBOARD =====
 function updDash(){
-  updHead();showChallenge();showQ(document.getElementById('dashQ'));renToday();renPet();
+  updHead();showChallenge();showQ(document.getElementById('dashQ'));renToday();renPet();checkAchievements();checkWeeklyRecap();
   if(D.streak>=3)document.getElementById('streakB').classList.add('hot');else document.getElementById('streakB').classList.remove('hot');
+  // Due cards alert
+  let totalDue=0;D.decks.forEach(dk=>totalDue+=getDueCards(dk).length);
+  const da=document.getElementById('dueAlert');
+  if(totalDue>0){da.innerHTML=`<div class="due-alert"><div class="da-text">&#128293; You have <span class="da-count">${totalDue}</span> cards due for review!</div><button class="btn btn-p btn-s" onclick="startQuickReview()">Quick Review</button></div>`}else{da.innerHTML=''}
   document.getElementById('s1').textContent=D.cardsReviewed;
   document.getElementById('s2').textContent=D.pomosCompleted;
   document.getElementById('s3').textContent=D.quizTotal>0?Math.round(D.quizCorrect/D.quizTotal*100)+'%':'0%';
@@ -1190,11 +1247,11 @@ function togglePomo(){
   else{pomo.on=true;['pBtn','focusBtn'].forEach(id=>document.getElementById(id).textContent='Pause');document.querySelector('.pt').classList.add('running');
     pomo.iv=setInterval(()=>{pomo.tl--;if(pomo.tl<=0){clearInterval(pomo.iv);pomo.on=false;['pBtn','focusBtn'].forEach(id=>document.getElementById(id).textContent='Start');
       if(pomo.mode==='focus'){pomo.sess++;D.pomosCompleted++;D.studyMinutes+=(D.settings.focus||25);const t=today();D.dailyMinutes[t]=(D.dailyMinutes[t]||0)+(D.settings.focus||25);
-        addXP(25);recAct();updGoals('pomos',1);updGoals('minutes',D.settings.focus||25);D.pomoLog.push({time:new Date().toLocaleTimeString(),date:today()});sv();
+        addXP(25);recAct();updGoals('pomos',1);updGoals('minutes',D.settings.focus||25);D.pomoLog.push({time:new Date().toLocaleTimeString(),date:today(),panel:D.lastPomoPanel||'focus'});sv();
         toast('Focus complete! +25 XP');sfx(880,0.3);notify('Pomodoro','Focus session complete!');renPLog();setPM(pomo.sess%4===0?'long':'short',null);if(D.settings.autoStart)setTimeout(togglePomo,1500)}
       else{toast('Break over!');sfx(440,0.2);notify('Pomodoro','Break is over!');setPM('focus',null);if(D.settings.autoStart)setTimeout(togglePomo,1500)}}updPD()},1000)}}
 function resetPomo(){clearInterval(pomo.iv);pomo.on=false;['pBtn','focusBtn'].forEach(id=>document.getElementById(id).textContent='Start');setPM(pomo.mode,document.querySelector('.pmb .mb.active'))}
-function renPLog(){const el=document.getElementById('pLog');if(D.pomoLog.length===0){el.textContent='No sessions yet.';return}el.innerHTML=D.pomoLog.slice(-8).reverse().map(l=>`<div style="padding:5px 0;border-bottom:1px solid var(--border)">Focus at ${l.time}</div>`).join('')}
+function renPLog(){const el=document.getElementById('pLog');if(D.pomoLog.length===0){el.textContent='No sessions yet.';return}const panelNames={fc:'Flashcards',notes:'Notes',quiz:'Quiz',tasks:'Tasks',wb:'Whiteboard',cu:'Count Up',focus:'Focus'};el.innerHTML=D.pomoLog.slice(-8).reverse().map(l=>`<div style="padding:5px 0;border-bottom:1px solid var(--border)">Focus at ${l.time}${l.panel?' <span style="font-size:0.72rem;color:var(--accent2)">'+(panelNames[l.panel]||l.panel)+'</span>':''}</div>`).join('')}
 
 // ===== STOPWATCH =====
 let sw={on:false,start:0,elapsed:0,iv:null,laps:[]};
@@ -1297,25 +1354,28 @@ function renCUSessions(){
 }
 
 // ===== FLASHCARDS =====
-let cDk=null,cCI=0,rQ=[];
+let cDk=null,cCI=0,rQ=[],fcReverse=false,quickReviewMode=false,quickReviewMap=[];
 function createDk(){const n=document.getElementById('ndkN').value.trim();if(!n)return;const cols=['var(--accent1)','var(--accent2)','var(--accent3)','var(--accent4)','var(--accent5)'];D.decks.push({id:Date.now(),name:n,color:cols[D.decks.length%cols.length],cards:[]});sv();document.getElementById('ndkN').value='';closeM('deckM');renDk();toast('Deck created!')}
 function delDk(i,e){e.stopPropagation();if(!confirm('Delete "'+D.decks[i].name+'"?'))return;D.decks.splice(i,1);sv();renDk()}
 function renDk(){const el=document.getElementById('dkList');if(D.decks.length===0){el.innerHTML='<div style="color:var(--muted);text-align:center;padding:36px;grid-column:1/-1">No decks yet.</div>';return}el.innerHTML=D.decks.map((d,i)=>{const due=getDueCards(d).length;return`<div class="di" onclick="openDk(${i})"><div class="dcl" style="background:${d.color}"></div><div class="da"><button onclick="delDk(${i},event)">X</button></div><div class="dn">${esc(d.name)}</div><div class="dc">${d.cards.length} cards</div>${due>0?`<div class="due-badge">${due} due</div>`:`<div class="due-badge none">All caught up</div>`}</div>`}).join('')}
 function openDk(i){cDk=i;document.getElementById('dkLV').style.display='none';document.getElementById('dkSV').style.display='block';resetDkR()}
 function resetDkR(){const dk=D.decks[cDk];const due=getDueCards(dk);rQ=due.length>0?due.sort(()=>Math.random()-0.5):dk.cards.map((_,i)=>i).sort(()=>Math.random()-0.5);cCI=0;document.getElementById('dkDone').style.display='none';document.getElementById('rBtns').style.display='none';showC()}
-function showC(){const dk=D.decks[cDk];if(!dk||rQ.length===0||cCI>=rQ.length){document.getElementById('fcard').style.display='none';document.getElementById('rBtns').style.display='none';document.getElementById('dkDone').style.display='block';document.getElementById('cProg').textContent='';return}document.getElementById('fcard').style.display='';document.getElementById('dkDone').style.display='none';const c=dk.cards[rQ[cCI]];document.getElementById('cFront').textContent=c.front;document.getElementById('cBack').textContent=c.back;document.getElementById('fcard').classList.remove('flipped');document.getElementById('rBtns').style.display='none';document.getElementById('cProg').textContent=`${cCI+1} / ${rQ.length}`}
+function renderMd(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/`(.+?)`/g,'<code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px">$1</code>').replace(/\n/g,'<br>')}
+function showC(){const dk=quickReviewMode?null:D.decks[cDk];const cards=quickReviewMode?quickReviewMap:dk?dk.cards:[];if((!dk&&!quickReviewMode)||rQ.length===0||cCI>=rQ.length){document.getElementById('fcard').style.display='none';document.getElementById('rBtns').style.display='none';document.getElementById('dkDone').style.display='block';document.getElementById('cProg').textContent='';if(quickReviewMode){quickReviewMode=false}return}document.getElementById('fcard').style.display='';document.getElementById('dkDone').style.display='none';const ci=rQ[cCI];const c=quickReviewMode?cards[ci].card:cards[ci];const front=fcReverse?c.back:c.front;const back=fcReverse?c.front:c.back;document.getElementById('cFront').innerHTML=renderMd(front);document.getElementById('cBack').innerHTML=renderMd(back);document.getElementById('fcard').classList.remove('flipped');document.getElementById('rBtns').style.display='none';document.getElementById('cProg').textContent=`${cCI+1} / ${rQ.length}`;const rb=document.getElementById('revBtn');if(rb)rb.style.borderColor=fcReverse?'var(--accent2)':'var(--border)'}
 function flipC(){document.getElementById('fcard').classList.toggle('flipped');if(document.getElementById('fcard').classList.contains('flipped'))document.getElementById('rBtns').style.display='flex'}
-function rateC(r){D.cardsReviewed++;const t=today();D.dailyCards[t]=(D.dailyCards[t]||0)+1;recAct();updGoals('cards',1);addXP({hard:3,good:5,easy:8}[r]);const quality={hard:0,good:3,easy:5}[r];const card=D.decks[cDk].cards[rQ[cCI]];sm2(card,quality);if(r==='hard')rQ.push(rQ[cCI]);cCI++;showC();sv();sfx(r==='easy'?880:r==='good'?660:440,0.1)}
+function rateC(r){D.cardsReviewed++;const t=today();D.dailyCards[t]=(D.dailyCards[t]||0)+1;recAct();updGoals('cards',1);addXP({hard:3,good:5,easy:8}[r]);const quality={hard:0,good:3,easy:5}[r];let card;if(quickReviewMode){const qr=quickReviewMap[rQ[cCI]];card=D.decks[qr.deckIdx].cards[qr.cardIdx]}else{card=D.decks[cDk].cards[rQ[cCI]]}sm2(card,quality);if(r==='hard')rQ.push(rQ[cCI]);cCI++;showC();sv();sfx(r==='easy'?880:r==='good'?660:440,0.1)}
 function addC(){const f=document.getElementById('ncF').value.trim(),b=document.getElementById('ncB').value.trim();if(!f||!b)return;D.decks[cDk].cards.push({front:f,back:b});sv();document.getElementById('ncF').value='';document.getElementById('ncB').value='';closeM('cardM');toast('Card added!');resetDkR()}
 function backDk(){document.getElementById('dkLV').style.display='';document.getElementById('dkSV').style.display='none';cDk=null;renDk()}
 function impCSV(){const n=document.getElementById('impN').value.trim()||'Imported';const csv=document.getElementById('impCSV').value.trim();if(!csv){toast('Paste CSV!');return}const cards=[];csv.split('\n').forEach(l=>{const p=l.split(',');if(p.length>=2)cards.push({front:p[0].trim().replace(/^"|"$/g,''),back:p.slice(1).join(',').trim().replace(/^"|"$/g,'')})});if(!cards.length){toast('No cards found!');return}const cols=['var(--accent1)','var(--accent2)','var(--accent3)','var(--accent4)','var(--accent5)'];D.decks.push({id:Date.now(),name:n,color:cols[D.decks.length%cols.length],cards});sv();closeM('impM');renDk();toast(`Imported ${cards.length} cards!`)}
 function exportDk(){if(cDk===null)return;const dk=D.decks[cDk];dlFile(dk.name+'.csv',dk.cards.map(c=>`"${c.front}","${c.back}"`).join('\n'),'text/csv')}
 
 // ===== NOTES =====
-let cN=null;
-function createN(){D.notes.unshift({id:Date.now(),title:'Untitled',body:'',date:new Date().toLocaleDateString()});cN=0;sv();renN()}
+let cN=null,noteFolder='all';
+function createN(){D.notes.unshift({id:Date.now(),title:'Untitled',body:'',date:new Date().toLocaleDateString(),folder:noteFolder==='all'?'':noteFolder});cN=0;sv();renN()}
+function renNFolders(){const el=document.getElementById('nfBar');if(!el)return;const folders=D.noteFolders||[];el.innerHTML=`<div class="nf-tag ${noteFolder==='all'?'active':''}" onclick="noteFolder='all';renN()">All</div>`+folders.map(f=>`<div class="nf-tag ${noteFolder===f?'active':''}" onclick="noteFolder='${esc(f)}';renN()">${esc(f)}</div>`).join('')}
+function addNoteFolder(){const n=document.getElementById('nfName').value.trim();if(!n)return;if(!D.noteFolders)D.noteFolders=[];if(D.noteFolders.includes(n)){toast('Folder exists!');return}D.noteFolders.push(n);sv();closeM('noteFolderM');document.getElementById('nfName').value='';renNFolders();toast('Folder created!')}
 function delN(i,e){e.stopPropagation();D.notes.splice(i,1);if(cN>=D.notes.length)cN=D.notes.length-1;if(!D.notes.length)cN=null;sv();renN()}
-function renN(){const el=document.getElementById('nList');if(!D.notes.length){el.innerHTML='<div style="color:var(--muted);padding:16px;text-align:center;font-size:0.83rem">No notes</div>';document.getElementById('nTitle').value='';document.getElementById('nBody').value='';return}el.innerHTML=D.notes.map((n,i)=>`<div class="ni ${i===cN?'active':''}" onclick="selN(${i})"><div class="nt">${esc(n.title||'Untitled')}</div><div class="nd">${n.date}</div><button class="nx" onclick="delN(${i},event)">X</button></div>`).join('');if(cN===null)cN=0;if(cN!==null&&D.notes[cN]){document.getElementById('nTitle').value=D.notes[cN].title;document.getElementById('nBody').value=D.notes[cN].body;updWC()}}
+function renN(){renNFolders();const el=document.getElementById('nList');const filtered=noteFolder==='all'?D.notes:D.notes.filter(n=>(n.folder||'')===noteFolder);if(!filtered.length){el.innerHTML='<div style="color:var(--muted);padding:16px;text-align:center;font-size:0.83rem">No notes</div>';document.getElementById('nTitle').value='';document.getElementById('nBody').value='';return}el.innerHTML=filtered.map((n,fi)=>{const ri=D.notes.indexOf(n);return`<div class="ni ${ri===cN?'active':''}" onclick="selN(${ri})"><div class="nt">${esc(n.title||'Untitled')}</div><div class="nd">${n.date}${n.folder?' · '+esc(n.folder):''}</div><button class="nx" onclick="delN(${ri},event)">X</button></div>`}).join('');if(cN===null)cN=0;if(cN!==null&&D.notes[cN]){document.getElementById('nTitle').value=D.notes[cN].title;document.getElementById('nBody').value=D.notes[cN].body;updWC()}}
 function selN(i){cN=i;renN()}
 function saveN(){if(cN===null||!D.notes[cN])return;D.notes[cN].title=document.getElementById('nTitle').value;D.notes[cN].body=document.getElementById('nBody').value;sv();updWC()}
 function updWC(){const b=document.getElementById('nBody').value;const w=b.trim()?b.trim().split(/\s+/).length:0;document.getElementById('nWC').textContent=w+' words';document.getElementById('nCC').textContent=b.length+' chars';document.getElementById('nRT').textContent=Math.max(1,Math.ceil(w/200))+' min read'}
@@ -1340,11 +1400,15 @@ function resetQ(){document.getElementById('qSetup').style.display='';document.ge
 // ===== TASKS =====
 let tFilt='all';
 function addT(){const t=document.getElementById('ntT').value.trim();if(!t)return;D.tasks.push({id:Date.now(),text:t,priority:document.getElementById('ntP').value,due:document.getElementById('ntD').value.trim(),done:false});sv();document.getElementById('ntT').value='';document.getElementById('ntD').value='';closeM('taskM');renT();toast('Task added!')}
-function renT(){const el=document.getElementById('tList');let ts=D.tasks;if(tFilt==='active')ts=ts.filter(t=>!t.done);if(tFilt==='done')ts=ts.filter(t=>t.done);ts=[...ts].sort((a,b)=>{if(a.done!==b.done)return a.done?1:-1;return{high:0,medium:1,low:2}[a.priority]-{high:0,medium:1,low:2}[b.priority]});if(!ts.length){el.innerHTML='<div style="color:var(--muted);text-align:center;padding:28px">Empty.</div>';return}el.innerHTML=ts.map(t=>`<div class="ti ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} onchange="togT(${t.id})"><span style="flex:1;${t.done?'text-decoration:line-through':''}">${esc(t.text)}${t.due?' <span style="color:var(--accent2);font-size:0.7rem">'+esc(t.due)+'</span>':''}</span><span style="font-size:0.7rem;color:${t.priority==='high'?'var(--accent3)':'var(--muted)'};text-transform:uppercase">${t.priority}</span><button class="btn btn-d btn-s" onclick="delT(${t.id})">X</button></div>`).join('')}
+function renT(){const el=document.getElementById('tList');let ts=D.tasks;if(tFilt==='active')ts=ts.filter(t=>!t.done);if(tFilt==='done')ts=ts.filter(t=>t.done);ts=[...ts].sort((a,b)=>{if(a.done!==b.done)return a.done?1:-1;return{high:0,medium:1,low:2}[a.priority]-{high:0,medium:1,low:2}[b.priority]});if(!ts.length){el.innerHTML='<div style="color:var(--muted);text-align:center;padding:28px">Empty.</div>';return}el.innerHTML=ts.map(t=>{const subs=t.subtasks||[];const subsDone=subs.filter(s=>s.done).length;const subHtml=subs.map((s,si)=>`<div class="subtask ${s.done?'done':''}"><input type="checkbox" ${s.done?'checked':''} onchange="togSubtask(${t.id},${si})"><span>${esc(s.text)}</span></div>`).join('');return`<div><div class="ti ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} onchange="togT(${t.id})"><span style="flex:1;${t.done?'text-decoration:line-through':''}">${esc(t.text)}${t.due?' <span style="color:var(--accent2);font-size:0.7rem">'+esc(t.due)+'</span>':''}${subs.length?' <span style="font-size:0.65rem;color:var(--accent2)">('+subsDone+'/'+subs.length+')</span>':''}</span><span style="font-size:0.7rem;color:${t.priority==='high'?'var(--accent3)':'var(--muted)'};text-transform:uppercase">${t.priority}</span><button class="btn btn-g btn-s" onclick="openSubtask(${t.id})" style="font-size:0.65rem">+sub</button><button class="btn btn-d btn-s" onclick="delT(${t.id})">X</button></div>${subHtml}</div>`}).join('')}
 function filt(f){tFilt=f;['fAll','fAct','fDn'].forEach(id=>document.getElementById(id).style.borderColor='var(--border)');document.getElementById({all:'fAll',active:'fAct',done:'fDn'}[f]).style.borderColor='var(--accent1)';renT()}
 function togT(id){const t=D.tasks.find(x=>x.id===id);if(t){t.done=!t.done;if(t.done){addXP(5);recAct();sfx(660,0.1)}sv();renT()}}
 function delT(id){D.tasks=D.tasks.filter(x=>x.id!==id);sv();renT()}
 function clearDone(){D.tasks=D.tasks.filter(t=>!t.done);sv();renT();toast('Cleared!')}
+let stTaskId=null;
+function openSubtask(id){stTaskId=id;document.getElementById('stText').value='';openM('subtaskM');setTimeout(()=>document.getElementById('stText').focus(),100)}
+function addSubtask(){const text=document.getElementById('stText').value.trim();if(!text)return;const t=D.tasks.find(x=>x.id===stTaskId);if(!t)return;if(!t.subtasks)t.subtasks=[];t.subtasks.push({text,done:false});sv();closeM('subtaskM');renT()}
+function togSubtask(taskId,subIdx){const t=D.tasks.find(x=>x.id===taskId);if(t&&t.subtasks&&t.subtasks[subIdx]){t.subtasks[subIdx].done=!t.subtasks[subIdx].done;sv();renT()}}
 
 // ===== HABITS =====
 function addHab(){const n=document.getElementById('nhN').value.trim();if(!n)return;D.habits.push({id:Date.now(),name:n,days:{}});sv();document.getElementById('nhN').value='';closeM('habM');renHab();toast('Habit added!')}
@@ -1737,10 +1801,11 @@ function renToday(){
   document.getElementById('todayDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
   const cards=D.dailyCards[t]||0,mins=D.dailyMinutes[t]||0,pomos=D.pomoLog.filter(l=>l.date===t).length;
   const habTotal=D.habits.length,habDone=D.habits.filter(h=>h.days&&h.days[t]).length;
+  const dt=D.settings.dailyTargets||{cards:20,minutes:60,pomos:4};
   const items=[
-    {label:'Cards',val:cards,max:20,color:'var(--accent1)'},
-    {label:'Focus',val:mins+'m',max:120,rawVal:mins,color:'var(--accent2)'},
-    {label:'Pomos',val:pomos,max:4,color:'var(--accent4)'},
+    {label:'Cards',val:cards,max:dt.cards,color:'var(--accent1)'},
+    {label:'Focus',val:mins+'m',max:dt.minutes,rawVal:mins,color:'var(--accent2)'},
+    {label:'Pomos',val:pomos,max:dt.pomos,color:'var(--accent4)'},
     {label:'Habits',val:habTotal?habDone+'/'+habTotal:'—',max:habTotal||1,rawVal:habDone,color:'var(--accent5)'}
   ];
   const circ=2*Math.PI*20;
@@ -2043,6 +2108,210 @@ addXP=function(n){
   else{addPetXP(1)}            // small actions (cards, habits, tasks)
   // Level up bonus
   if(D.level>lvBefore){addPetXP(10)}
+};
+
+// ===== QUICK REVIEW =====
+function startQuickReview(){
+  quickReviewMap=[];quickReviewMode=true;
+  D.decks.forEach((dk,di)=>{getDueCards(dk).forEach(ci=>{quickReviewMap.push({deckIdx:di,cardIdx:ci,card:dk.cards[ci]})})});
+  if(!quickReviewMap.length){toast('No cards due!');quickReviewMode=false;return}
+  rQ=quickReviewMap.map((_,i)=>i).sort(()=>Math.random()-0.5);cCI=0;
+  go('fc');document.getElementById('dkLV').style.display='none';document.getElementById('dkSV').style.display='block';
+  document.getElementById('dkDone').style.display='none';document.getElementById('rBtns').style.display='none';showC();
+  toast(`Quick Review: ${quickReviewMap.length} cards from ${new Set(quickReviewMap.map(m=>m.deckIdx)).size} decks`);
+}
+function toggleReverse(){fcReverse=!fcReverse;toast(fcReverse?'Reverse mode: showing answer first':'Normal mode');showC()}
+
+// ===== DECK SHARING =====
+function shareDk(){
+  if(cDk===null)return;const dk=D.decks[cDk];
+  const data={name:dk.name,cards:dk.cards.map(c=>({front:c.front,back:c.back}))};
+  const code=btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  document.getElementById('shareCode').value=code;openM('shareM');
+}
+function copyShareCode(){navigator.clipboard.writeText(document.getElementById('shareCode').value).then(()=>toast('Code copied!')).catch(()=>toast('Failed to copy'))}
+function importSharedDeck(){
+  const code=document.getElementById('importShareCode').value.trim();if(!code){toast('Paste a code!');return}
+  try{
+    const data=JSON.parse(decodeURIComponent(escape(atob(code))));
+    if(!data.name||!data.cards||!data.cards.length)throw new Error('Invalid');
+    const cols=['var(--accent1)','var(--accent2)','var(--accent3)','var(--accent4)','var(--accent5)'];
+    D.decks.push({id:Date.now(),name:data.name,color:cols[D.decks.length%cols.length],cards:data.cards.map(c=>({front:c.front,back:c.back}))});
+    sv();closeM('importShareM');renDk();toast(`Imported "${data.name}" with ${data.cards.length} cards!`);
+  }catch(e){toast('Invalid deck code!')}
+}
+
+// ===== STREAK FREEZE =====
+function earnFreeze(){
+  if(D.streakFreezes>=3){toast('Max 3 freezes!');return}
+  D.streakFreezes++;sv();toast('Earned a streak freeze! ❄️ ('+D.streakFreezes+'/3)');updHead();
+}
+
+// ===== AUTO THEME =====
+function togAutoTheme(){D.settings.autoTheme=!D.settings.autoTheme;sv();updAutoThemeBtn();if(D.settings.autoTheme)applyAutoTheme()}
+function updAutoThemeBtn(){const b=document.getElementById('sAutoTheme');if(b)b.classList.toggle('on',D.settings.autoTheme)}
+function applyAutoTheme(){
+  if(!D.settings.autoTheme)return;
+  const dark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  const theme=dark?'midnight':'light';
+  D.settings.theme=theme;document.documentElement.setAttribute('data-theme',theme);sv();
+}
+try{window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(D.settings.autoTheme)applyAutoTheme()})}catch(e){}
+
+// ===== DAILY TARGETS =====
+function saveDailyTargets(){
+  D.settings.dailyTargets={
+    cards:parseInt(document.getElementById('sDailyCards').value)||20,
+    minutes:parseInt(document.getElementById('sDailyMins').value)||60,
+    pomos:parseInt(document.getElementById('sDailyPomos').value)||4
+  };sv();
+}
+
+// ===== WEEKLY RECAP =====
+function getWeekNum(d){const t=new Date(d);t.setHours(0,0,0,0);t.setDate(t.getDate()+3-(t.getDay()+6)%7);const y=new Date(t.getFullYear(),0,4);return Math.round(((t-y)/864e5-3+(y.getDay()+6)%7)/7)+1}
+function checkWeeklyRecap(){
+  const now=new Date();const wk=now.getFullYear()+'-W'+getWeekNum(now);
+  if(D.lastRecapWeek===wk)return;if(now.getDay()===0)return; // don't show on Sunday
+  // Check if we have last week's data
+  const lastWeekStart=new Date(now);lastWeekStart.setDate(lastWeekStart.getDate()-lastWeekStart.getDay()-6);
+  let hasData=false;
+  for(let i=0;i<7;i++){const d=new Date(lastWeekStart);d.setDate(d.getDate()+i);const k=d.toISOString().split('T')[0];if(D.activity[k]||D.dailyCards[k]||D.dailyMinutes[k])hasData=true}
+  if(!hasData)return;
+  showWeeklyRecap();D.lastRecapWeek=wk;sv();
+}
+function showWeeklyRecap(){
+  const now=new Date();
+  function weekData(weeksAgo){
+    const start=new Date(now);start.setDate(start.getDate()-start.getDay()-6-(weeksAgo*7));
+    let cards=0,mins=0,pomos=0,qc=0,qt=0,acts=0;
+    for(let i=0;i<7;i++){const d=new Date(start);d.setDate(d.getDate()+i);const k=d.toISOString().split('T')[0];
+      cards+=D.dailyCards[k]||0;mins+=D.dailyMinutes[k]||0;acts+=D.activity[k]||0;
+      pomos+=D.pomoLog.filter(l=>l.date===k).length}
+    return{cards,mins,pomos,acts}
+  }
+  const last=weekData(0),prev=weekData(1);
+  function delta(a,b){if(a>b)return`<span class="rs-delta rs-up">+${a-b} ↑</span>`;if(a<b)return`<span class="rs-delta rs-down">${a-b} ↓</span>`;return`<span class="rs-delta rs-same">= same</span>`}
+  const box=document.getElementById('recapBox');
+  box.innerHTML=`<div style="text-align:center;margin-bottom:16px"><div style="font-size:2rem;margin-bottom:4px">📊</div><h3>Weekly Recap</h3><p style="color:var(--muted);font-size:0.85rem">Here's how last week went!</p></div>
+    <div class="recap-stat"><span>Cards Reviewed</span><div><span class="rs-val">${last.cards}</span> ${delta(last.cards,prev.cards)}</div></div>
+    <div class="recap-stat"><span>Study Time</span><div><span class="rs-val">${last.mins>=60?Math.floor(last.mins/60)+'h '+last.mins%60+'m':last.mins+'m'}</span> ${delta(last.mins,prev.mins)}</div></div>
+    <div class="recap-stat"><span>Pomodoros</span><div><span class="rs-val">${last.pomos}</span> ${delta(last.pomos,prev.pomos)}</div></div>
+    <div class="recap-stat"><span>Activities</span><div><span class="rs-val">${last.acts}</span> ${delta(last.acts,prev.acts)}</div></div>
+    <div class="recap-stat" style="border:none"><span>Current Streak</span><div><span class="rs-val">${D.streak} days</span></div></div>
+    <div style="text-align:center;margin-top:16px"><button class="btn btn-p" onclick="closeRecap()">Keep Going! 💪</button></div>`;
+  document.getElementById('recapOverlay').classList.add('open');
+}
+function closeRecap(){document.getElementById('recapOverlay').classList.remove('open')}
+
+// ===== STUDY CALENDAR =====
+let calMonth=new Date().getMonth(),calYear=new Date().getFullYear();
+function renStudyCal(){
+  const el=document.getElementById('studyCal');if(!el)return;
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const t=today();
+  let html=`<div class="cal-nav"><button onclick="calMonth--;if(calMonth<0){calMonth=11;calYear--}renStudyCal()">&#9664;</button><span>${months[calMonth]} ${calYear}</span><button onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++}renStudyCal()">&#9654;</button></div>`;
+  html+=`<div class="cal-grid">`;
+  ['S','M','T','W','T','F','S'].forEach(d=>html+=`<div class="cal-hdr">${d}</div>`);
+  for(let i=0;i<firstDay;i++)html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const k=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const v=D.activity[k]||0;const isToday=k===t;
+    const bg=v===0?'rgba(255,255,255,0.03)':v<=2?'rgba(124,58,237,0.2)':v<=5?'rgba(124,58,237,0.4)':v<=10?'rgba(124,58,237,0.65)':'var(--accent1)';
+    const color=v>5?'#fff':'var(--text)';
+    html+=`<div class="cal-day ${isToday?'today':''} ${v>0?'has':''}" style="background:${bg};color:${color}" title="${k}: ${v} activities">${d}</div>`;
+  }
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+
+// ===== ACHIEVEMENT POPUPS =====
+function checkAchievements(){
+  const achs=[{n:'First Step',ok:D.cardsReviewed>=1},{n:'Card Shark',ok:D.cardsReviewed>=50},{n:'Card Master',ok:D.cardsReviewed>=500},{n:'Focused',ok:D.pomosCompleted>=1},{n:'Deep Work',ok:D.pomosCompleted>=10},{n:'Marathon',ok:D.pomosCompleted>=50},{n:'Week Warrior',ok:D.streak>=7},{n:'Month Master',ok:D.streak>=30},{n:'Lv 5',ok:D.level>=5},{n:'Lv 10',ok:D.level>=10},{n:'Lv 25',ok:D.level>=25},{n:'Scholar',ok:D.notes.length>=10},{n:'Deck Builder',ok:D.decks.length>=5},{n:'Study Hour',ok:D.studyMinutes>=60},{n:'10 Hours',ok:D.studyMinutes>=600},{n:'Journalist',ok:D.journal.length>=10},{n:'Quiz Whiz',ok:D.quizTotal>0&&D.quizCorrect/D.quizTotal>=0.8},{n:'Pet Hatcher',ok:D.pet&&D.pet.xp>=100},{n:'Beast Tamer',ok:D.pet&&D.pet.xp>=800},{n:'Legendary Tamer',ok:D.pet&&D.pet.xp>=1500},{n:'Pet Lover',ok:D.pet&&D.pet.pats>=100}];
+  if(!D.achievementsSeen)D.achievementsSeen={};
+  achs.forEach(a=>{
+    if(a.ok&&!D.achievementsSeen[a.n]){
+      D.achievementsSeen[a.n]=true;sv();
+      showAchPopup(a.n);
+    }
+  });
+}
+function showAchPopup(name){
+  const el=document.createElement('div');el.className='ach-popup';
+  el.innerHTML=`<div style="font-size:1.5rem">🏆</div><div style="font-weight:800;margin-top:4px">Achievement Unlocked!</div><div style="font-size:0.88rem;color:var(--muted);margin-top:2px">${esc(name)}</div>`;
+  document.body.appendChild(el);sfx(880,0.3);
+  setTimeout(()=>{el.style.transition='opacity 0.5s';el.style.opacity='0';setTimeout(()=>el.remove(),500)},3500);
+}
+
+// ===== PET MILESTONE SKINS =====
+const PET_SKINS={
+  dragon:{default:'',skins:[{name:'Golden Dragon',sprite:'&#128050;&#10024;',req:'1000 cards',check:()=>D.cardsReviewed>=1000},{name:'Shadow Dragon',sprite:'&#128009;&#128420;',req:'Level 25',check:()=>D.level>=25},{name:'Frost Dragon',sprite:'&#128050;&#10052;',req:'100 day streak',check:()=>D.streak>=100}]},
+  cat:{default:'',skins:[{name:'Lucky Cat',sprite:'&#128049;&#127808;',req:'1000 cards',check:()=>D.cardsReviewed>=1000},{name:'Shadow Cat',sprite:'&#128008;&#128420;',req:'Level 25',check:()=>D.level>=25},{name:'Snow Cat',sprite:'&#128049;&#10052;',req:'100 day streak',check:()=>D.streak>=100}]},
+  bird:{default:'',skins:[{name:'Phoenix',sprite:'&#129413;&#128293;',req:'1000 cards',check:()=>D.cardsReviewed>=1000},{name:'Thunder Eagle',sprite:'&#129413;&#9889;',req:'Level 25',check:()=>D.level>=25},{name:'Ice Eagle',sprite:'&#129413;&#10052;',req:'100 day streak',check:()=>D.streak>=100}]},
+  ocean:{default:'',skins:[{name:'Coral Whale',sprite:'&#128011;&#127800;',req:'1000 cards',check:()=>D.cardsReviewed>=1000},{name:'Abyss Shark',sprite:'&#129416;&#128420;',req:'Level 25',check:()=>D.level>=25},{name:'Arctic Whale',sprite:'&#128011;&#10052;',req:'100 day streak',check:()=>D.streak>=100}]}
+};
+function getUnlockedSkins(){
+  const pet=getPet();const type=pet.type||'dragon';
+  const skins=PET_SKINS[type]?PET_SKINS[type].skins:[];
+  return skins.filter(s=>s.check());
+}
+function setPetSkin(skinName){
+  const pet=getPet();pet.skin=skinName;sv();renPet();toast('Skin equipped: '+skinName);
+}
+
+// ===== SETTINGS RENDER UPDATE =====
+const _origRenSett=renSett;
+renSett=function(){
+  _origRenSett();
+  updAutoThemeBtn();
+  const dt=D.settings.dailyTargets||{cards:20,minutes:60,pomos:4};
+  document.getElementById('sDailyCards').value=dt.cards;
+  document.getElementById('sDailyMins').value=dt.minutes;
+  document.getElementById('sDailyPomos').value=dt.pomos;
+};
+
+// ===== STATS RENDER UPDATE =====
+const _origRenStats=renStats;
+renStats=function(){
+  _origRenStats();
+  renStudyCal();
+};
+
+// ===== PET RENDER UPDATE (skins) =====
+const _origRenPetInner=_renPetInner;
+_renPetInner=function(){
+  _origRenPetInner();
+  // Add skins section
+  const pet=getPet();if(!pet.type)return;
+  const unlocked=getUnlockedSkins();
+  const skinEl=document.getElementById('petChangeType');
+  if(skinEl){
+    const skinHtml=unlocked.length?'<div style="margin-top:12px"><h3 style="font-size:0.92rem;margin-bottom:8px">Rare Skins</h3><div style="display:flex;gap:6px;flex-wrap:wrap">'+
+      unlocked.map(s=>`<button class="btn ${pet.skin===s.name?'btn-p':'btn-g'} btn-s" onclick="setPetSkin('${esc(s.name)}')" style="font-size:0.78rem">${s.sprite} ${s.name}</button>`).join('')+
+      '</div></div>':'';
+    const allSkins=(PET_SKINS[pet.type]||{skins:[]}).skins;
+    const lockedHtml=allSkins.filter(s=>!s.check()).length?'<div style="margin-top:8px;font-size:0.75rem;color:var(--muted)">Locked: '+allSkins.filter(s=>!s.check()).map(s=>`${s.name} (${s.req})`).join(', ')+'</div>':'';
+    skinEl.insertAdjacentHTML('afterend',skinHtml+lockedHtml);
+  }
+  // Apply skin sprite if selected
+  if(pet.skin){
+    const skin=(PET_SKINS[pet.type]||{skins:[]}).skins.find(s=>s.name===pet.skin&&s.check());
+    if(skin){
+      const sprite=document.getElementById('petSprite');if(sprite)sprite.innerHTML=skin.sprite;
+      const dashSprite=document.getElementById('dashPetSprite');if(dashSprite)dashSprite.innerHTML=skin.sprite;
+    }
+  }
+};
+
+// ===== STREAK FREEZE IN DAILY CHALLENGE =====
+const _origPetFeed=petFeed;
+petFeed=function(){
+  const pet=getPet();
+  const wasFed=pet.lastFed===today();
+  _origPetFeed();
+  // If feed succeeded (pet was not fed before, now is), earn a freeze
+  if(!wasFed&&pet.lastFed===today()){earnFreeze()}
 };
 
 // ===== ADMIN =====
