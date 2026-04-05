@@ -40,6 +40,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .nav-btn .tt{position:absolute;left:56px;background:#1e1e2e;color:#fff;padding:4px 10px;border-radius:7px;font-size:0.7rem;white-space:nowrap;pointer-events:none;opacity:0;transform:translateX(-5px);transition:all 0.2s;border:1px solid var(--border);z-index:99}
 .nav-btn:hover .tt{opacity:1;transform:translateX(0)}
 .sdiv{width:30px;height:1px;background:var(--border);margin:5px 0}
+.nav-label{font-size:0.5rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-top:6px;margin-bottom:1px;opacity:0.7}
 .main{margin-left:72px;flex:1;padding:26px;max-width:1100px;width:100%}
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px}
 .header h2{font-size:1.45rem;font-weight:700}
@@ -507,19 +508,26 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <nav class="sidebar">
 <div class="logo">SB</div>
 <button class="nav-btn active" data-p="dash" onclick="go('dash')"><span>&#9783;</span><span class="tt">Dashboard</span></button>
+<div class="sdiv"></div>
+<div class="nav-label">Timer</div>
 <button class="nav-btn" data-p="pomo" onclick="go('pomo')"><span>&#9202;</span><span class="tt">Pomodoro</span></button>
 <button class="nav-btn" data-p="sw" onclick="go('sw')"><span>&#9201;</span><span class="tt">Stopwatch</span></button>
 <button class="nav-btn" data-p="cu" onclick="go('cu')"><span>&#9650;</span><span class="tt">Count Up</span></button>
+<div class="sdiv"></div>
+<div class="nav-label">Learn</div>
 <button class="nav-btn" data-p="fc" onclick="go('fc')"><span>&#9879;</span><span class="tt">Flashcards</span></button>
 <button class="nav-btn" data-p="notes" onclick="go('notes')"><span>&#9998;</span><span class="tt">Notes</span></button>
 <button class="nav-btn" data-p="quiz" onclick="go('quiz')"><span>&#10067;</span><span class="tt">Quiz</span></button>
-<button class="nav-btn" data-p="tasks" onclick="go('tasks')"><span>&#9745;</span><span class="tt">Tasks</span></button>
+<button class="nav-btn" data-p="wb" onclick="go('wb')"><span>&#9999;</span><span class="tt">Whiteboard</span></button>
 <div class="sdiv"></div>
+<div class="nav-label">Track</div>
+<button class="nav-btn" data-p="tasks" onclick="go('tasks')"><span>&#9745;</span><span class="tt">Tasks</span></button>
 <button class="nav-btn" data-p="habits" onclick="go('habits')"><span>&#9733;</span><span class="tt">Habits</span></button>
 <button class="nav-btn" data-p="goals" onclick="go('goals')"><span>&#9872;</span><span class="tt">Goals</span></button>
 <button class="nav-btn" data-p="journal" onclick="go('journal')"><span>&#9997;</span><span class="tt">Journal</span></button>
+<div class="sdiv"></div>
+<div class="nav-label">More</div>
 <button class="nav-btn" data-p="ambient" onclick="go('ambient')"><span>&#9836;</span><span class="tt">Ambient</span></button>
-<button class="nav-btn" data-p="wb" onclick="go('wb')"><span>&#9999;</span><span class="tt">Whiteboard</span></button>
 <button class="nav-btn" data-p="pet" onclick="go('pet')"><span>&#128062;</span><span class="tt">Study Pet</span></button>
 <button class="nav-btn" data-p="room" onclick="go('room')"><span>&#128101;</span><span class="tt">Study Room</span></button>
 <div class="sdiv"></div>
