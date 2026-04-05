@@ -266,7 +266,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 .md h3{margin-bottom:14px}
 .fg{margin-bottom:12px}.fg label{display:block;font-size:0.8rem;color:var(--muted);margin-bottom:5px}
 
-.toast{position:fixed;bottom:28px;right:28px;background:var(--card);backdrop-filter:blur(16px);color:var(--text);border:1px solid var(--border);padding:11px 18px;border-radius:12px;font-size:0.85rem;z-index:200;animation:fadeUp 0.3s ease;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
+.toast{position:fixed;bottom:28px;right:28px;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:11px 18px;border-radius:12px;font-size:0.85rem;z-index:200;animation:fadeUp 0.3s ease;box-shadow:0 8px 30px rgba(0,0,0,0.3)}
 
 /* Confetti */
 .confetti-piece{position:fixed;z-index:300;pointer-events:none;animation:confettiFall 2s ease-out forwards}
@@ -1148,7 +1148,7 @@ function resetSW(){clearInterval(sw.iv);const e=sw.elapsed+(sw.on?Date.now()-sw.
 let cu={on:false,start:0,elapsed:0,iv:null,target:0,targetReached:false};
 function saveCUState(){
   const e=cu.elapsed+(cu.on?Date.now()-cu.start:0);
-  sessionStorage.setItem('sb_cu',JSON.stringify({elapsed:e,on:cu.on,start:cu.on?Date.now():0,target:cu.target,targetReached:cu.targetReached}));
+  sessionStorage.setItem('sb_cu',JSON.stringify({elapsed:e,on:cu.on,savedAt:Date.now(),target:cu.target,targetReached:cu.targetReached}));
 }
 function loadCUState(){
   try{
@@ -1156,7 +1156,9 @@ function loadCUState(){
     cu.target=s.target||0;cu.targetReached=s.targetReached||false;
     document.getElementById('cuTarget').value=cu.target;
     if(s.on){
-      cu.elapsed=s.elapsed;cu.on=true;cu.start=Date.now();
+      // Add time that passed between save and now
+      cu.elapsed=s.elapsed+(Date.now()-(s.savedAt||Date.now()));
+      cu.on=true;cu.start=Date.now();
       document.getElementById('cuBtn').textContent='Pause';
       cu.iv=setInterval(updCU,200);
     } else {
@@ -1167,6 +1169,7 @@ function loadCUState(){
   }catch(e){}
 }
 function clearCUState(){sessionStorage.removeItem('sb_cu')}
+window.addEventListener('beforeunload',()=>{if(cu.on||cu.elapsed>0)saveCUState()});
 function toggleCU(){
   if(cu.on){clearInterval(cu.iv);cu.elapsed+=Date.now()-cu.start;cu.on=false;document.getElementById('cuBtn').textContent='Resume';saveCUState()}
   else{cu.on=true;cu.start=Date.now();document.getElementById('cuBtn').textContent='Pause';cu.iv=setInterval(updCU,200);saveCUState()}
