@@ -215,7 +215,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .fl-exit{position:absolute;top:20px;right:20px;z-index:2}
 .fl-exit-confirm{display:none;position:fixed;inset:0;z-index:450;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center}
 .fl-exit-confirm.open{display:flex}
-.fl-exit-box{background:#15152a;border:1px solid var(--border);border-radius:18px;padding:28px;width:90%;max-width:400px;text-align:center;animation:fadeUp 0.3s ease}
+.fl-exit-box{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:18px;padding:28px;width:90%;max-width:400px;text-align:center;animation:fadeUp 0.3s ease}
 .fl-exit-box h3{margin-bottom:8px;color:var(--accent3)}
 .fl-exit-box p{color:var(--muted);font-size:0.88rem;margin-bottom:16px}
 .fl-exit-box input{width:100%;padding:10px;margin-bottom:12px;text-align:center}
@@ -237,7 +237,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 /* Search */
 .search-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:200;align-items:flex-start;justify-content:center;padding-top:15vh}
 .search-overlay.open{display:flex}
-.search-box{background:#15152a;border:1px solid var(--border);border-radius:16px;width:90%;max-width:520px;padding:0;overflow:hidden;animation:fadeUp 0.2s ease}
+.search-box{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:16px;width:90%;max-width:520px;padding:0;overflow:hidden;animation:fadeUp 0.2s ease}
 .search-box input{width:100%;background:transparent;border:none;color:var(--text);padding:16px 20px;font-size:1.1rem;outline:none}
 .search-results{max-height:300px;overflow-y:auto;border-top:1px solid var(--border)}
 .sr-item{padding:10px 20px;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;gap:10px;transition:background 0.15s}
@@ -262,11 +262,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 
 .mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center}
 .mo.open{display:flex}
-.md{background:#15152a;border:1px solid var(--border);border-radius:18px;padding:24px;width:90%;max-width:460px;animation:fadeUp 0.3s ease;max-height:90vh;overflow-y:auto}
+.md{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:18px;padding:24px;width:90%;max-width:460px;animation:fadeUp 0.3s ease;max-height:90vh;overflow-y:auto}
 .md h3{margin-bottom:14px}
 .fg{margin-bottom:12px}.fg label{display:block;font-size:0.8rem;color:var(--muted);margin-bottom:5px}
 
-.toast{position:fixed;bottom:28px;right:28px;background:#1e1e2e;border:1px solid var(--border);padding:11px 18px;border-radius:12px;font-size:0.85rem;z-index:200;animation:fadeUp 0.3s ease;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
+.toast{position:fixed;bottom:28px;right:28px;background:var(--card);backdrop-filter:blur(16px);color:var(--text);border:1px solid var(--border);padding:11px 18px;border-radius:12px;font-size:0.85rem;z-index:200;animation:fadeUp 0.3s ease;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
 
 /* Confetti */
 .confetti-piece{position:fixed;z-index:300;pointer-events:none;animation:confettiFall 2s ease-out forwards}
@@ -653,13 +653,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="fg"><label>Questions</label><input type="number" id="qCnt" value="10" min="1" max="50"></div>
 <div class="fg"><label>Mode</label><select id="qMode"><option value="mc">Multiple Choice</option><option value="tf">True / False</option><option value="type">Type Answer</option></select></div>
 <button class="btn btn-p" onclick="startQuiz()" style="margin-top:6px">Start Quiz</button></div>
-<div id="qActive" style="display:none" class="glass" style="max-width:580px;margin:0 auto">
+<div id="qActive" style="display:none;max-width:580px;margin:0 auto" class="glass">
 <div class="qsb"><span id="qProg">Q1/10</span><span id="qTimer" style="color:var(--accent2)"></span><span id="qScr">Score: 0</span></div>
 <div class="qq" id="qQ"></div><div class="qopts" id="qOpts"></div>
 <div id="qTA" style="display:none;margin-top:10px"><input type="text" id="qTI" placeholder="Type answer..." onkeydown="if(event.key==='Enter')chkTyped()"><button class="btn btn-p btn-s" style="margin-top:6px" onclick="chkTyped()">Submit</button></div>
 <div id="qExp" style="display:none;margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:10px;font-size:0.88rem;color:var(--muted)"></div>
 <button class="btn btn-p" id="qNext" style="display:none;margin-top:14px" onclick="nextQ()">Next</button></div>
-<div id="qResult" style="display:none" class="glass" style="text-align:center;padding:36px">
+<div id="qResult" style="display:none;text-align:center;padding:36px" class="glass">
 <div style="font-size:3.5rem;font-weight:900" id="qFS">0%</div>
 <p style="color:var(--muted);margin:8px 0" id="qFT"></p>
 <div id="qRL" style="text-align:left;margin:16px 0;font-size:0.88rem"></div>
@@ -1120,7 +1120,7 @@ function setPM(mode,btn){
   document.getElementById('pLabel').textContent={focus:'Focus',short:'Short Break',long:'Long Break'}[mode];updPD()}
 function updPD(){
   const m=Math.floor(pomo.tl/60),s=pomo.tl%60;document.getElementById('pTime').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  document.getElementById('pCircle').style.strokeDashoffset=753.98*(1-(1-pomo.tl/pomo.total));
+  document.getElementById('pCircle').style.strokeDashoffset=753.98*(1-pomo.tl/pomo.total);
   const ds=document.getElementById('pSess');ds.innerHTML='';for(let i=0;i<4;i++)ds.innerHTML+=`<div class="pd ${i<pomo.sess%4?'dn':''}"></div>`;updFocus()}
 function togglePomo(){
   if(pomo.on){clearInterval(pomo.iv);pomo.on=false;['pBtn','focusBtn'].forEach(id=>document.getElementById(id).textContent='Resume');document.querySelector('.pt').classList.remove('running')}
@@ -1140,15 +1140,36 @@ function toggleSW(){
   else{sw.on=true;sw.start=Date.now();document.getElementById('swBtn').textContent='Pause';sw.iv=setInterval(updSW,100)}}
 function updSW(){const e=sw.elapsed+(sw.on?Date.now()-sw.start:0);const h=Math.floor(e/36e5),m=Math.floor((e%36e5)/6e4),s=Math.floor((e%6e4)/1e3);document.getElementById('swDisplay').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
 function lapSW(){if(!sw.on)return;const e=sw.elapsed+Date.now()-sw.start;sw.laps.push(e);const el=document.getElementById('swLaps');const h=Math.floor(e/36e5),m=Math.floor((e%36e5)/6e4),s=Math.floor((e%6e4)/1e3);el.innerHTML=`<div class="lap"><span>Lap ${sw.laps.length}</span><span>${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</span></div>`+el.innerHTML}
-function resetSW(){clearInterval(sw.iv);sw.on=false;sw.elapsed=0;sw.laps=[];document.getElementById('swBtn').textContent='Start';document.getElementById('swDisplay').textContent='00:00:00';document.getElementById('swLaps').innerHTML='';
+function resetSW(){clearInterval(sw.iv);const e=sw.elapsed+(sw.on?Date.now()-sw.start:0);sw.on=false;sw.elapsed=0;sw.laps=[];document.getElementById('swBtn').textContent='Start';document.getElementById('swDisplay').textContent='00:00:00';document.getElementById('swLaps').innerHTML='';
   // Log time
-  if(sw.elapsed>60000){const mins=Math.round(sw.elapsed/60000);D.studyMinutes+=mins;const t=today();D.dailyMinutes[t]=(D.dailyMinutes[t]||0)+mins;addXP(mins);recAct();updGoals('minutes',mins);sv()}}
+  if(e>60000){const mins=Math.round(e/60000);D.studyMinutes+=mins;const t=today();D.dailyMinutes[t]=(D.dailyMinutes[t]||0)+mins;addXP(mins);recAct();updGoals('minutes',mins);sv()}}
 
 // ===== COUNT UP TIMER =====
-let cu={on:false,start:0,elapsed:0,iv:null,target:0};
+let cu={on:false,start:0,elapsed:0,iv:null,target:0,targetReached:false};
+function saveCUState(){
+  const e=cu.elapsed+(cu.on?Date.now()-cu.start:0);
+  sessionStorage.setItem('sb_cu',JSON.stringify({elapsed:e,on:cu.on,start:cu.on?Date.now():0,target:cu.target,targetReached:cu.targetReached}));
+}
+function loadCUState(){
+  try{
+    const s=JSON.parse(sessionStorage.getItem('sb_cu'));if(!s||!s.elapsed)return;
+    cu.target=s.target||0;cu.targetReached=s.targetReached||false;
+    document.getElementById('cuTarget').value=cu.target;
+    if(s.on){
+      cu.elapsed=s.elapsed;cu.on=true;cu.start=Date.now();
+      document.getElementById('cuBtn').textContent='Pause';
+      cu.iv=setInterval(updCU,200);
+    } else {
+      cu.elapsed=s.elapsed;cu.on=false;
+      document.getElementById('cuBtn').textContent='Resume';
+    }
+    updCU();updCUTarget();
+  }catch(e){}
+}
+function clearCUState(){sessionStorage.removeItem('sb_cu')}
 function toggleCU(){
-  if(cu.on){clearInterval(cu.iv);cu.elapsed+=Date.now()-cu.start;cu.on=false;document.getElementById('cuBtn').textContent='Resume'}
-  else{cu.on=true;cu.start=Date.now();document.getElementById('cuBtn').textContent='Pause';cu.iv=setInterval(updCU,200)}
+  if(cu.on){clearInterval(cu.iv);cu.elapsed+=Date.now()-cu.start;cu.on=false;document.getElementById('cuBtn').textContent='Resume';saveCUState()}
+  else{cu.on=true;cu.start=Date.now();document.getElementById('cuBtn').textContent='Pause';cu.iv=setInterval(updCU,200);saveCUState()}
 }
 function updCU(){
   const e=cu.elapsed+(cu.on?Date.now()-cu.start:0);
@@ -1157,16 +1178,16 @@ function updCU(){
   if(cu.target>0){
     const pct=Math.min(100,(e/(cu.target*60000))*100);
     document.getElementById('cuProgressFill').style.width=pct+'%';
-    if(pct>=100&&pct<101){document.getElementById('cuTargetLabel').innerHTML='<span style="color:var(--accent4)">Target reached!</span>';sfx(880,0.3);confetti()}
+    if(pct>=100&&!cu.targetReached){cu.targetReached=true;document.getElementById('cuTargetLabel').innerHTML='<span style="color:var(--accent4)">Target reached!</span>';sfx(880,0.3);confetti();saveCUState()}
   }
 }
 function resetCU(){
   const e=cu.elapsed+(cu.on?Date.now()-cu.start:0);
-  clearInterval(cu.iv);cu.on=false;cu.elapsed=0;
+  clearInterval(cu.iv);cu.on=false;cu.elapsed=0;cu.targetReached=false;
   document.getElementById('cuBtn').textContent='Start';
   document.getElementById('cuDisplay').textContent='00:00:00';
   document.getElementById('cuProgressFill').style.width='0%';
-  updCUTarget();
+  updCUTarget();clearCUState();
   if(e>60000){const mins=Math.round(e/60000);D.studyMinutes+=mins;const t=today();D.dailyMinutes[t]=(D.dailyMinutes[t]||0)+mins;addXP(mins);recAct();updGoals('minutes',mins);sv()}
 }
 function saveCUSession(){
@@ -1178,11 +1199,11 @@ function saveCUSession(){
   D.studyMinutes+=Math.round(mins);
   const t=today();D.dailyMinutes[t]=(D.dailyMinutes[t]||0)+Math.round(mins);
   addXP(Math.round(mins));recAct();updGoals('minutes',Math.round(mins));sv();
-  clearInterval(cu.iv);cu.on=false;cu.elapsed=0;
+  clearInterval(cu.iv);cu.on=false;cu.elapsed=0;cu.targetReached=false;
   document.getElementById('cuBtn').textContent='Start';
   document.getElementById('cuDisplay').textContent='00:00:00';
   document.getElementById('cuProgressFill').style.width='0%';
-  updCUTarget();
+  updCUTarget();clearCUState();
   renCUSessions();
   toast(`Session saved! ${mins} minutes logged.`);
 }
@@ -1365,7 +1386,8 @@ function saveWB(){const a=document.createElement('a');a.download='whiteboard.png
 // ===== STUDY ROOM (WebSocket Real-time) =====
 const ROOM_COLORS=['#7c3aed','#06b6d4','#f43f5e','#10b981','#f59e0b','#ff00ff','#3b82f6','#ef4444'];
 const RELAY_URL='wss://studybeast-relay.onrender.com';
-let ws=null, roomMembers={}, roomCode='', roomMyId='', roomStatusInterval=null, chatSeen=new Set();
+let ws=null, roomMembers={}, roomCode='', roomMyId='', roomStatusInterval=null, chatSeen=new Set(), roomStartXP=0;
+function getTotalXP(){return 100*(D.level-1)*D.level/2+D.xp}
 
 function saveRoomState(){
   if(roomCode&&roomMyId){
@@ -1394,6 +1416,7 @@ async function autoRejoinRoom(retries){
   }
   roomCode=rs.code;
   roomMyId=rs.myId;
+  roomStartXP=getTotalXP();
   const st=getMyStatus();
   if(roomMyId.startsWith('host_'))st.isHost=true;
   wsSend({type:'join',code:roomCode,userId:roomMyId,status:st});
@@ -1408,7 +1431,7 @@ function getMyStatus(){
   let status='Idle', timer='';
   if(pEl&&pEl.textContent!=='00:00'){status='Studying';timer=pEl.textContent}
   const pet=getPet();const petStage=getStagesForPet()[getPetStage()];
-  return{name:getMyName(),color:getMyColor(),status,timer,level:D.level,streak:D.streak,xp:D.xp,ts:Date.now(),petName:pet.name,petStage:petStage.name}
+  return{name:getMyName(),color:getMyColor(),status,timer,level:D.level,streak:D.streak,xp:D.xp,sessionXP:getTotalXP()-roomStartXP,ts:Date.now(),petName:pet.name,petStage:petStage.name}
 }
 
 let wsReconnectTimer=null;
@@ -1484,6 +1507,7 @@ async function createRoom(){
   try{await connectWS()}catch(e){toast('Failed to connect. Check internet.');return}
   roomCode=genRoomCode();
   roomMyId='host_'+Math.random().toString(36).slice(2,8);
+  roomStartXP=getTotalXP();
   const st=getMyStatus(); st.isHost=true;
   wsSend({type:'create',code:roomCode,userId:roomMyId,status:st});
 }
@@ -1496,6 +1520,7 @@ async function joinRoom(){
   try{await connectWS()}catch(e){toast('Failed to connect. Check internet.');return}
   roomCode=code;
   roomMyId='user_'+Math.random().toString(36).slice(2,8);
+  roomStartXP=getTotalXP();
   const st=getMyStatus();
   wsSend({type:'join',code:roomCode,userId:roomMyId,status:st});
 }
@@ -1554,21 +1579,17 @@ function renRoomMembers(){
 function renLeaderboard(){
   const el=document.getElementById('roomLeaderboard');if(!el)return;
   const medals=['&#129351;','&#129352;','&#129353;'];
-  const sorted=Object.entries(roomMembers).sort((a,b)=>{
-    const al=a[1].level||1,bl=b[1].level||1;
-    if(bl!==al)return bl-al;
-    return(b[1].xp||0)-(a[1].xp||0);
-  });
+  const sorted=Object.entries(roomMembers).sort((a,b)=>(b[1].sessionXP||0)-(a[1].sessionXP||0));
   if(!sorted.length){el.innerHTML='<p style="color:var(--muted);font-size:0.85rem">No members yet</p>';return}
   el.innerHTML=sorted.map(([id,m],i)=>{
     const isMe=id===roomMyId;
     const rank=i<3?medals[i]:`<span style="font-weight:700;color:var(--muted)">#${i+1}</span>`;
     return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:${isMe?'rgba(124,58,237,0.15)':'rgba(255,255,255,0.04)'};border-radius:10px;border:1px solid ${isMe?'var(--accent1)':'var(--border)'}">
       <div style="font-size:1.2rem;min-width:28px;text-align:center">${rank}</div>
-      <div class="rm-av" style="background:${m.color||'var(--accent1)'};width:30px;height:30px;font-size:0.8rem">${(m.name||'?')[0].toUpperCase()}</div>
+      <div style="background:${m.color||'var(--accent1)'};width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:#fff;flex-shrink:0">${(m.name||'?')[0].toUpperCase()}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.name||'?')}${isMe?' (You)':''}</div>
-        <div style="font-size:0.78rem;color:var(--muted)">Lv ${m.level||1} &middot; ${m.xp||0} XP &middot; ${m.streak||0} day streak</div>
+        <div style="font-size:0.78rem;color:var(--muted)">+${m.sessionXP||0} XP this session &middot; Lv ${m.level||1}</div>
       </div>
     </div>`;
   }).join('');
@@ -1964,7 +1985,7 @@ function initApp(){
     D=ld();
     document.documentElement.setAttribute('data-theme',D.settings.theme||'midnight');
     getPet();
-    updDash();updPD();renDk();renN();renT();renPLog();renHab();renGoals();renAmb();renJournal();updAutoBtn();updCUTarget();renCUSessions();
+    updDash();updPD();renDk();renN();renT();renPLog();renHab();renGoals();renAmb();renJournal();updAutoBtn();updCUTarget();renCUSessions();loadCUState();
     autoRejoinRoom();
   }catch(e){console.error('initApp error:',e)}
 }
