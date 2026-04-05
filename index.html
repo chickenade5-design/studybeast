@@ -396,6 +396,23 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 .toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform 0.2s}
 .toggle.on::after{transform:translateX(18px)}
 
+/* Admin */
+.admin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.admin-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center}
+.admin-stat .as-val{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--accent3),var(--accent1));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.admin-stat .as-lbl{font-size:0.74rem;color:var(--muted);margin-top:3px}
+.admin-user{display:flex;align-items:center;gap:12px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;transition:all 0.2s}
+.admin-user:hover{border-color:var(--accent1);transform:translateY(-2px)}
+.admin-user .au-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:1rem;flex-shrink:0}
+.admin-user .au-info{flex:1;min-width:0}
+.admin-user .au-name{font-weight:700;font-size:0.92rem}
+.admin-user .au-meta{font-size:0.78rem;color:var(--muted);margin-top:2px}
+.admin-user .au-stats{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.admin-user .au-tag{font-size:0.7rem;padding:2px 8px;border-radius:10px;background:rgba(124,58,237,0.1);color:var(--accent1)}
+.admin-lock{max-width:400px;margin:60px auto;text-align:center}
+.admin-lock input{text-align:center;margin-top:12px}
+@media(max-width:768px){.admin-grid{grid-template-columns:1fr 1fr}}
+
 /* Streak celebration */
 @keyframes streakGlow{0%,100%{box-shadow:0 0 0 rgba(245,158,11,0)}50%{box-shadow:0 0 12px rgba(245,158,11,0.3)}}
 .badge-st.hot{animation:streakGlow 2s ease-in-out infinite}
@@ -508,6 +525,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div class="sdiv"></div>
 <button class="nav-btn" data-p="stats" onclick="go('stats')"><span>&#9670;</span><span class="tt">Stats</span></button>
 <button class="nav-btn" data-p="settings" onclick="go('settings')"><span>&#9881;</span><span class="tt">Settings</span></button>
+<button class="nav-btn" data-p="admin" onclick="go('admin')" id="adminNavBtn" style="display:none"><span>&#128737;</span><span class="tt">Admin</span></button>
 </nav>
 
 <!-- Mobile Bottom Nav -->
@@ -845,6 +863,42 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent1)}
 <div><kbd style="background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:5px">Esc</kbd> Exit Focus / Close Modal</div>
 </div></div></div>
 
+<!-- ADMIN -->
+<div class="panel" id="p-admin">
+<div class="header"><h2>Admin Panel</h2><div class="hr"><span class="badge" style="background:rgba(244,63,94,0.15);color:var(--accent3)">Admin</span><button class="btn btn-d btn-s" onclick="adminLogout()">Lock Admin</button></div></div>
+<div id="adminLock" class="admin-lock glass">
+<div style="font-size:3rem;margin-bottom:8px">&#128737;</div>
+<h3>Admin Access</h3>
+<p style="color:var(--muted);font-size:0.88rem;margin-top:6px">Enter the admin code to continue.</p>
+<div class="fg"><input type="password" id="adminCodeInput" placeholder="Admin code" onkeydown="if(event.key==='Enter')adminLogin()"></div>
+<button class="btn btn-p" onclick="adminLogin()" style="margin-top:6px">Unlock</button>
+<div id="adminErr" style="color:var(--accent3);font-size:0.82rem;margin-top:10px;min-height:20px"></div>
+</div>
+<div id="adminMain" style="display:none">
+<div class="admin-grid" id="adminStats"></div>
+<div class="g2" style="margin-bottom:14px">
+<div class="glass">
+<h3 style="font-size:0.92rem;margin-bottom:10px">Broadcast Message</h3>
+<p style="color:var(--muted);font-size:0.82rem;margin-bottom:8px">Send a system message to the active study room.</p>
+<div style="display:flex;gap:8px"><input type="text" id="adminBroadcast" placeholder="Type a message..."><button class="btn btn-p btn-s" onclick="adminBroadcastMsg()">Send</button></div>
+</div>
+<div class="glass">
+<h3 style="font-size:0.92rem;margin-bottom:10px">Admin Settings</h3>
+<div class="fg"><label>Change Admin Code</label><input type="password" id="adminNewCode" placeholder="New admin code"></div>
+<div style="display:flex;gap:8px"><button class="btn btn-p btn-s" onclick="adminChangeCode()">Update Code</button><button class="btn btn-d btn-s" onclick="adminResetCode()">Reset to Default</button></div>
+</div>
+</div>
+<div class="glass" style="margin-bottom:14px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="font-size:0.92rem">All Users</h3><span style="font-size:0.78rem;color:var(--muted)" id="adminUserCount"></span></div>
+<div id="adminUserList"></div>
+</div>
+<div class="glass">
+<h3 style="font-size:0.92rem;margin-bottom:10px">Content Overview</h3>
+<div id="adminContent" style="font-size:0.88rem;line-height:2"></div>
+</div>
+</div>
+</div>
+
 </div></div>
 
 <!-- MODALS -->
@@ -976,6 +1030,7 @@ function go(n){
   if(n==='ambient')renAmb();if(n==='room')renRoomMembers();if(n==='settings')renSett();
   if(n==='cu'){updCUTarget();renCUSessions()}
   if(n==='pet')renPet()
+  if(n==='admin'&&isAdmin)renAdmin()
 }
 function openM(id){document.getElementById(id).classList.add('open')}
 function closeM(id){document.getElementById(id).classList.remove('open')}
@@ -1981,6 +2036,150 @@ addXP=function(n){
   // Level up bonus
   if(D.level>lvBefore){addPetXP(10)}
 };
+
+// ===== ADMIN =====
+const ADMIN_DB='sb_admin';
+const DEFAULT_ADMIN_CODE='studybeast';
+let isAdmin=false;
+async function getAdminHash(){
+  try{const h=localStorage.getItem(ADMIN_DB);if(h)return h;
+  const def=await hashPass(DEFAULT_ADMIN_CODE);localStorage.setItem(ADMIN_DB,def);return def}catch(e){return null}
+}
+async function adminLogin(){
+  const inp=document.getElementById('adminCodeInput').value;
+  const err=document.getElementById('adminErr');
+  if(!inp){err.textContent='Enter the admin code';return}
+  const hash=await hashPass(inp);
+  const stored=await getAdminHash();
+  if(hash!==stored){err.textContent='Wrong admin code';return}
+  isAdmin=true;err.textContent='';
+  document.getElementById('adminLock').style.display='none';
+  document.getElementById('adminMain').style.display='';
+  document.getElementById('adminNavBtn').style.display='';
+  renAdmin();
+}
+function adminLogout(){
+  isAdmin=false;
+  document.getElementById('adminLock').style.display='';
+  document.getElementById('adminMain').style.display='none';
+  document.getElementById('adminCodeInput').value='';
+  toast('Admin locked');
+}
+async function adminChangeCode(){
+  const inp=document.getElementById('adminNewCode').value.trim();
+  if(!inp||inp.length<4){toast('Code must be at least 4 characters');return}
+  const hash=await hashPass(inp);
+  localStorage.setItem(ADMIN_DB,hash);
+  document.getElementById('adminNewCode').value='';
+  toast('Admin code updated!');
+}
+function adminResetCode(){
+  if(!confirm('Reset admin code to default?'))return;
+  localStorage.removeItem(ADMIN_DB);
+  toast('Admin code reset to default');
+}
+function getAllUsers(){
+  const users=getUsers();
+  const result=[];
+  Object.keys(users).forEach(name=>{
+    let data=null;
+    try{data=JSON.parse(localStorage.getItem('sb3_'+name))}catch(e){}
+    result.push({name,created:users[name].created,data});
+  });
+  return result;
+}
+function renAdmin(){
+  if(!isAdmin)return;
+  const users=getAllUsers();
+  const totalUsers=users.length;
+  let totalMinutes=0,totalCards=0,totalPomos=0,totalDecks=0,totalNotes=0,totalTasks=0,totalJournal=0;
+  users.forEach(u=>{
+    if(!u.data)return;
+    totalMinutes+=u.data.studyMinutes||0;
+    totalCards+=u.data.cardsReviewed||0;
+    totalPomos+=u.data.pomosCompleted||0;
+    totalDecks+=(u.data.decks||[]).length;
+    totalNotes+=(u.data.notes||[]).length;
+    totalTasks+=(u.data.tasks||[]).length;
+    totalJournal+=(u.data.journal||[]).length;
+  });
+  // Stats
+  document.getElementById('adminStats').innerHTML=`
+    <div class="admin-stat"><div class="as-val">${totalUsers}</div><div class="as-lbl">Total Users</div></div>
+    <div class="admin-stat"><div class="as-val">${totalMinutes>=60?Math.floor(totalMinutes/60)+'h':totalMinutes+'m'}</div><div class="as-lbl">Total Study Time</div></div>
+    <div class="admin-stat"><div class="as-val">${totalCards}</div><div class="as-lbl">Cards Reviewed</div></div>
+    <div class="admin-stat"><div class="as-val">${totalPomos}</div><div class="as-lbl">Pomodoros Done</div></div>`;
+  // User count
+  document.getElementById('adminUserCount').textContent=totalUsers+' registered';
+  // User list
+  const colors=['#7c3aed','#06b6d4','#f43f5e','#10b981','#f59e0b','#ff00ff','#3b82f6','#ef4444'];
+  document.getElementById('adminUserList').innerHTML=users.length===0?'<div style="color:var(--muted);padding:16px;text-align:center">No users yet.</div>':
+    users.sort((a,b)=>{
+      const al=a.data?a.data.level||1:0,bl=b.data?b.data.level||1:0;return bl-al;
+    }).map(u=>{
+      const d=u.data;const col=colors[u.name.length%colors.length];
+      const isCurrent=u.name===authUser;
+      if(!d)return `<div class="admin-user"><div class="au-av" style="background:${col}">${u.name[0].toUpperCase()}</div><div class="au-info"><div class="au-name">${esc(u.name)}${isCurrent?' <span style="color:var(--accent2);font-size:0.72rem">(you)</span>':''}</div><div class="au-meta">No data</div></div><button class="btn btn-d btn-s" onclick="adminDelUser('${esc(u.name)}')">Delete</button></div>`;
+      const mins=d.studyMinutes||0;const timeStr=mins>=60?Math.floor(mins/60)+'h '+mins%60+'m':mins+'m';
+      const joined=u.created?new Date(u.created).toLocaleDateString():'Unknown';
+      return `<div class="admin-user">
+        <div class="au-av" style="background:${col}">${u.name[0].toUpperCase()}</div>
+        <div class="au-info">
+          <div class="au-name">${esc(u.name)}${isCurrent?' <span style="color:var(--accent2);font-size:0.72rem">(you)</span>':''}</div>
+          <div class="au-meta">Joined ${joined} &middot; Lv ${d.level||1} &middot; ${d.streak||0} day streak &middot; ${timeStr} studied</div>
+          <div class="au-stats">
+            <span class="au-tag">&#9879; ${d.cardsReviewed||0} cards</span>
+            <span class="au-tag">&#9202; ${d.pomosCompleted||0} pomos</span>
+            <span class="au-tag">&#128218; ${(d.decks||[]).length} decks (${(d.decks||[]).reduce((a,dk)=>a+(dk.cards||[]).length,0)} cards)</span>
+            <span class="au-tag">&#9998; ${(d.notes||[]).length} notes</span>
+            <span class="au-tag">&#9745; ${(d.tasks||[]).length} tasks</span>
+            <span class="au-tag">&#9997; ${(d.journal||[]).length} journal</span>
+            ${d.pet&&d.pet.type?`<span class="au-tag">&#128062; ${esc(d.pet.name||'Pet')} (${esc(d.pet.type)})</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+          <button class="btn btn-d btn-s" onclick="adminDelUser('${esc(u.name)}')"${isCurrent?' disabled title="Cannot delete yourself"':''}>Delete</button>
+          <button class="btn btn-g btn-s" onclick="adminResetUser('${esc(u.name)}')"${isCurrent?' disabled':''}>Reset</button>
+          <button class="btn btn-g btn-s" onclick="adminExportUser('${esc(u.name)}')">Export</button>
+        </div>
+      </div>`;
+    }).join('');
+  // Content overview
+  document.getElementById('adminContent').innerHTML=`
+    <div><strong>${totalDecks}</strong> decks with <strong>${users.reduce((a,u)=>a+(u.data?(u.data.decks||[]).reduce((b,dk)=>b+(dk.cards||[]).length,0):0),0)}</strong> total flashcards</div>
+    <div><strong>${totalNotes}</strong> notes</div>
+    <div><strong>${totalTasks}</strong> tasks (<strong>${users.reduce((a,u)=>a+(u.data?(u.data.tasks||[]).filter(t=>t.done).length:0),0)}</strong> completed)</div>
+    <div><strong>${totalJournal}</strong> journal entries</div>
+    <div><strong>${users.reduce((a,u)=>a+(u.data?(u.data.habits||[]).length:0),0)}</strong> habits tracked</div>
+    <div><strong>${users.reduce((a,u)=>a+(u.data?(u.data.goals||[]).length:0),0)}</strong> goals set (<strong>${users.reduce((a,u)=>a+(u.data?(u.data.goals||[]).filter(g=>g.current>=g.target).length:0),0)}</strong> achieved)</div>
+    <div style="margin-top:10px;color:var(--muted);font-size:0.82rem">Quiz accuracy across all users: <strong>${(()=>{let c=0,t=0;users.forEach(u=>{if(u.data){c+=u.data.quizCorrect||0;t+=u.data.quizTotal||0}});return t>0?Math.round(c/t*100)+'%':'N/A'})()}</strong></div>`;
+}
+function adminDelUser(name){
+  if(name===authUser){toast('Cannot delete yourself!');return}
+  if(!confirm(`Delete user "${name}" and ALL their data? This cannot be undone!`))return;
+  const users=getUsers();delete users[name];saveUsers(users);
+  localStorage.removeItem('sb3_'+name);
+  toast(`User "${name}" deleted`);renAdmin();
+}
+function adminResetUser(name){
+  if(name===authUser){toast('Cannot reset yourself from here. Use Settings.');return}
+  if(!confirm(`Reset ALL data for "${name}"? Their account will remain but data will be wiped.`))return;
+  localStorage.removeItem('sb3_'+name);
+  toast(`Data reset for "${name}"`);renAdmin();
+}
+function adminExportUser(name){
+  let data=null;try{data=JSON.parse(localStorage.getItem('sb3_'+name))}catch(e){}
+  if(!data){toast('No data for this user');return}
+  dlFile(`studybeast-${name}-backup.json`,JSON.stringify(data,null,2),'application/json');
+}
+function adminBroadcastMsg(){
+  const inp=document.getElementById('adminBroadcast');
+  const text=inp.value.trim();if(!text){toast('Enter a message');return}
+  if(!ws||!roomCode){toast('Not connected to a study room');return}
+  wsSend({type:'chat',name:'[ADMIN]',text,color:'#f43f5e'});
+  addChatMsg('[ADMIN]',text,'#f43f5e');
+  inp.value='';toast('Broadcast sent!');
+}
 
 // ===== INIT =====
 function initApp(){
